@@ -1,0 +1,52 @@
+const productos = [
+    {
+        id: "mouse",
+        nombre: "Logitech G203",
+        categoria: "Mouse",
+        precio: 29990,
+        imagen: "/img/mouse-logitech.jpg",
+        descripcion: "Mouse gamer RGB con sensor de hasta 8.000 DPI."
+    },
+    {
+        id: "teclado",
+        nombre: "HyperX Alloy Origins",
+        categoria: "Teclados",
+        precio: 54990,
+        imagen: "/img/teclado-hyperx.jpg",
+        descripcion: "Teclado mecánico gamer con iluminación RGB."
+    },
+    {
+        id: "audifonos",
+        nombre: "HyperX Cloud II",
+        categoria: "Audio",
+        precio: 59990,
+        imagen: "/img/audifonos-hyperx.jpg",
+        descripcion: "Audífonos gamer con sonido envolvente."
+    },
+    {
+        id: "mousepad",
+        nombre: "Mousepad XL",
+        categoria: "Accesorios",
+        precio: 14990,
+        imagen: "/img/mousepad.jpg",
+        descripcion: "Mousepad gamer de gran tamaño para teclado y mouse."
+    },
+    {
+        id: "control",
+        nombre: "Control Xbox",
+        categoria: "Controles",
+        precio: 59990,
+        imagen: "/img/control-xbox.jpg",
+        descripcion: "Control inalámbrico compatible con Xbox y PC."
+    },
+    {
+        id: "webcam",
+        nombre: "Logitech C920",
+        categoria: "Streaming",
+        precio: 69990,
+        imagen: "/img/webcam.jpg",
+        descripcion: "Webcam Full HD ideal para streaming y videollamadas."
+    }
+];
+
+export default productos;

@@ -1,32 +1,32 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
+import {
+    calcularTotal,
+    aumentarCantidad,
+    eliminarProducto
+} from "../utils/logicaNexaGear.js";
+
+
 function Carrito({ carrito, setCarrito }) {
 
-    function aumentarCantidad(id) {
 
-        const carritoActualizado = carrito.map(function(producto) {
+    function aumentar(id) {
 
-            if (producto.id === id) {
-                return {
-                    ...producto,
-                    cantidad: producto.cantidad + 1
-                };
-            }
-
-            return producto;
-        });
+        const carritoActualizado =
+            aumentarCantidad(carrito, id);
 
         setCarrito(carritoActualizado);
     }
 
 
-    function disminuirCantidad(id) {
+    function disminuir(id) {
 
         const carritoActualizado = carrito
             .map(function(producto) {
 
                 if (producto.id === id) {
+
                     return {
                         ...producto,
                         cantidad: producto.cantidad - 1
@@ -36,6 +36,7 @@ function Carrito({ carrito, setCarrito }) {
                 return producto;
             })
             .filter(function(producto) {
+
                 return producto.cantidad > 0;
             });
 
@@ -43,27 +44,23 @@ function Carrito({ carrito, setCarrito }) {
     }
 
 
-    function eliminarProducto(id) {
+    function eliminar(id) {
 
-        const nuevoCarrito = carrito.filter(function(producto) {
-            return producto.id !== id;
-        });
+        const nuevoCarrito =
+            eliminarProducto(carrito, id);
 
         setCarrito(nuevoCarrito);
     }
 
 
     function vaciarCarrito() {
+
         setCarrito([]);
     }
 
 
-    const total = carrito.reduce(function(acumulado, producto) {
-
-        return acumulado +
-            producto.precio * producto.cantidad;
-
-    }, 0);
+    const total =
+        calcularTotal(carrito);
 
 
     return (
@@ -97,7 +94,8 @@ function Carrito({ carrito, setCarrito }) {
                     {carrito.map(function(producto) {
 
                         const subtotal =
-                            producto.precio * producto.cantidad;
+                            producto.precio *
+                            producto.cantidad;
 
                         return (
                             <div
@@ -116,8 +114,7 @@ function Carrito({ carrito, setCarrito }) {
                                             </h5>
 
                                             <p className="mb-1">
-                                                Precio:
-                                                {" "}
+                                                Precio:{" "}
                                                 $
                                                 {producto.precio.toLocaleString(
                                                     "es-CL"
@@ -125,14 +122,12 @@ function Carrito({ carrito, setCarrito }) {
                                             </p>
 
                                             <p className="mb-1">
-                                                Cantidad:
-                                                {" "}
+                                                Cantidad:{" "}
                                                 {producto.cantidad}
                                             </p>
 
                                             <p className="fw-bold mb-3">
-                                                Subtotal:
-                                                {" "}
+                                                Subtotal:{" "}
                                                 $
                                                 {subtotal.toLocaleString(
                                                     "es-CL"
@@ -150,7 +145,7 @@ function Carrito({ carrito, setCarrito }) {
                                                     type="button"
                                                     className="btn btn-success"
                                                     onClick={function() {
-                                                        aumentarCantidad(
+                                                        aumentar(
                                                             producto.id
                                                         );
                                                     }}
@@ -162,7 +157,7 @@ function Carrito({ carrito, setCarrito }) {
                                                     type="button"
                                                     className="btn btn-warning"
                                                     onClick={function() {
-                                                        disminuirCantidad(
+                                                        disminuir(
                                                             producto.id
                                                         );
                                                     }}
@@ -174,7 +169,7 @@ function Carrito({ carrito, setCarrito }) {
                                                     type="button"
                                                     className="btn btn-danger"
                                                     onClick={function() {
-                                                        eliminarProducto(
+                                                        eliminar(
                                                             producto.id
                                                         );
                                                     }}
@@ -201,8 +196,7 @@ function Carrito({ carrito, setCarrito }) {
                         <div className="card-body">
 
                             <h2 className="text-end">
-                                Total:
-                                {" "}
+                                Total:{" "}
                                 ${total.toLocaleString("es-CL")}
                             </h2>
 

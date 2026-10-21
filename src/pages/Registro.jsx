@@ -1,5 +1,10 @@
 import React, { useState } from "react";
 
+import {
+    correoEsValido,
+    contrasenasCoinciden
+} from "../utils/logicaNexaGear.js";
+
 function Registro() {
 
     const [formulario, setFormulario] = useState({
@@ -39,15 +44,17 @@ function Registro() {
 
         // NOMBRE
 
-        if (formulario.nombre.trim() === "") {
+        if (formulario.correo.trim() === "") {
 
-            nuevosErrores.nombre =
-                "El nombre es obligatorio.";
+            nuevosErrores.correo =
+                "El correo electrónico es obligatorio.";
 
-        } else if (formulario.nombre.trim().length < 2) {
+        } else if (
+            !correoEsValido(formulario.correo)
+        ) {
 
-            nuevosErrores.nombre =
-                "El nombre debe tener al menos 2 caracteres.";
+            nuevosErrores.correo =
+                "Ingrese un correo electrónico válido.";
         }
 
 
@@ -98,14 +105,18 @@ function Registro() {
 
         // CONFIRMAR CONTRASEÑA
 
-        if (formulario.confirmarContrasena === "") {
+        if (
+            formulario.confirmarContrasena === ""
+        ) {
 
             nuevosErrores.confirmarContrasena =
                 "Debe confirmar la contraseña.";
 
-        } else if (
-            formulario.contrasena !==
-            formulario.confirmarContrasena
+        }else if (
+            !contrasenasCoinciden(
+                formulario.contrasena,
+                formulario.confirmarContrasena
+            )
         ) {
 
             nuevosErrores.confirmarContrasena =

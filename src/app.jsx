@@ -18,6 +18,7 @@ import PagoError from "./pages/PagoError.jsx";
 import AdminProductos from "./pages/AdminProductos.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
 import AdminCategorias from "./pages/AdminCategorias.jsx";
+import { obtenerPrecioFinal } from "./utils/logicaNexaGear.js";
 
 function App() {
 
@@ -45,10 +46,7 @@ function App() {
     function agregarAlCarrito(producto) {
 
     const precioFinal =
-        producto.oferta && producto.precioOferta
-            ? producto.precioOferta
-            : producto.precio;
-
+        obtenerPrecioFinal(producto);
 
     const productoExistente = carrito.find(function(item) {
         return item.id === producto.id;
@@ -57,18 +55,19 @@ function App() {
 
     if (productoExistente) {
 
-        const carritoActualizado = carrito.map(function(item) {
+        const carritoActualizado =
+            carrito.map(function(item) {
 
-            if (item.id === producto.id) {
+                if (item.id === producto.id) {
 
-                return {
-                    ...item,
-                    cantidad: item.cantidad + 1
-                };
-            }
+                    return {
+                        ...item,
+                        cantidad: item.cantidad + 1
+                    };
+                }
 
-            return item;
-        });
+                return item;
+            });
 
         setCarrito(carritoActualizado);
 
@@ -82,7 +81,6 @@ function App() {
                 cantidad: 1
             }
         ]);
-
     }
 }
 

@@ -3,13 +3,18 @@ import React from "react";
 import ProductoCard from "../components/ProductoCard.jsx";
 import { obtenerProductos } from "../services/productosService.js";
 
+import {
+    filtrarOfertas
+} from "../utils/logicaNexaGear.js";
+
+
 function Ofertas({ agregarAlCarrito }) {
 
     const productos = obtenerProductos();
 
-    const productosEnOferta = productos.filter(function(producto) {
-        return producto.oferta === true;
-    });
+    const productosEnOferta =
+        filtrarOfertas(productos);
+
 
     return (
         <main className="container py-5">
@@ -21,6 +26,7 @@ function Ofertas({ agregarAlCarrito }) {
             <p className="text-center mb-5">
                 Aprovecha nuestros productos con descuento.
             </p>
+
 
             <div className="row">
 

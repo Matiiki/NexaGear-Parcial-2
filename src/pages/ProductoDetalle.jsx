@@ -1,19 +1,26 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
 
-import productos from "../data/productos.js";
+import { obtenerProductos } from "../services/productosService.js";
 
-function ProductoDetalle() {
+function ProductoDetalle({ agregarAlCarrito }) {
+
     const { id } = useParams();
+
+    const productos = obtenerProductos();
 
     const producto = productos.find(function(item) {
         return item.id === id;
     });
 
     if (!producto) {
+
         return (
             <main className="container py-5 text-center">
-                <h1>Producto no encontrado</h1>
+
+                <h1>
+                    Producto no encontrado
+                </h1>
 
                 <Link
                     to="/productos"
@@ -21,6 +28,7 @@ function ProductoDetalle() {
                 >
                     Volver a productos
                 </Link>
+
             </main>
         );
     }
@@ -54,9 +62,25 @@ function ProductoDetalle() {
                         {producto.nombre}
                     </h1>
 
-                    <p className="fs-3 fw-bold">
-                        ${producto.precio.toLocaleString("es-CL")}
-                    </p>
+                    {producto.oferta ? (
+
+                        <>
+                            <p className="text-decoration-line-through text-muted">
+                                ${producto.precio.toLocaleString("es-CL")}
+                            </p>
+
+                            <p className="fs-3 fw-bold text-danger">
+                                ${producto.precioOferta.toLocaleString("es-CL")}
+                            </p>
+                        </>
+
+                    ) : (
+
+                        <p className="fs-3 fw-bold">
+                            ${producto.precio.toLocaleString("es-CL")}
+                        </p>
+
+                    )}
 
                     <p>
                         {producto.descripcion}
@@ -65,6 +89,9 @@ function ProductoDetalle() {
                     <button
                         type="button"
                         className="btn btn-primary me-2"
+                        onClick={function() {
+                            agregarAlCarrito(producto);
+                        }}
                     >
                         Agregar al carrito
                     </button>

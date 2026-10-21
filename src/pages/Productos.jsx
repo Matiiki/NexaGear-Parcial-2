@@ -1,9 +1,12 @@
 import React from "react";
 
-import productos from "../data/productos.js";
 import ProductoCard from "../components/ProductoCard.jsx";
+import { obtenerProductos } from "../services/productosService.js";
 
-function Productos() {
+function Productos({ agregarAlCarrito }) {
+
+    const productos = obtenerProductos();
+
     return (
         <main className="container py-5">
 
@@ -18,12 +21,15 @@ function Productos() {
             <div className="row">
 
                 {productos.map(function(producto) {
+
                     return (
                         <ProductoCard
                             key={producto.id}
                             producto={producto}
+                            agregarAlCarrito={agregarAlCarrito}
                         />
                     );
+
                 })}
 
             </div>

@@ -1,7 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-function Header() {
+function Header({ carrito }) {
+
+    const cantidadTotal =
+        carrito.reduce(function(total, producto) {
+            return total + producto.cantidad;
+        }, 0);
+
     return (
         <header className="navbar navbar-expand-lg navbar-dark bg-dark px-4">
 
@@ -38,14 +44,40 @@ function Header() {
                     </li>
 
                     <li className="nav-item">
-                        <Link className="nav-link" to="/registro">
+                        <Link className="nav-link" to="/registro"
+
+                        >
                             Registro
                         </Link>
                     </li>
 
                     <li className="nav-item">
-                        <Link className="nav-link" to="/contacto">
+                        <Link className="nav-link" to="/contacto"
+                        
+                        >
                             Contacto
+                        </Link>
+                    </li>
+                    <li className="nav-item">
+                        <Link className="nav-link" to="/categorias">
+                            Categorías
+                        </Link>
+                    </li>
+
+                    <li className="nav-item">
+                        <Link className="nav-link" to="/ofertas">
+                            Ofertas
+                        </Link>
+                    </li>
+                    
+                    <li className="nav-item">
+                        <Link className="nav-link" to="/login">
+                            Iniciar sesión
+                        </Link>
+                    </li>
+                    <li className="nav-item">
+                        <Link className="nav-link" to="/admin">
+                            Admin
                         </Link>
                     </li>
 
@@ -55,7 +87,7 @@ function Header() {
                     className="btn btn-outline-light"
                     to="/carrito"
                 >
-                    🛒 Carrito
+                    🛒 Carrito ({cantidadTotal})
                 </Link>
 
             </div>

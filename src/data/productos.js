@@ -5,7 +5,9 @@ const productos = [
         categoria: "Mouse",
         precio: 29990,
         imagen: "/img/mouse-logitech.jpg",
-        descripcion: "Mouse gamer RGB con sensor de hasta 8.000 DPI."
+        descripcion: "Mouse gamer RGB con sensor de hasta 8.000 DPI.",
+        oferta: true,
+        precioOferta: 24990
     },
     {
         id: "teclado",
@@ -13,7 +15,8 @@ const productos = [
         categoria: "Teclados",
         precio: 54990,
         imagen: "/img/teclado-hyperx.jpg",
-        descripcion: "Teclado mecánico gamer con iluminación RGB."
+        descripcion: "Teclado mecánico gamer con iluminación RGB.",
+        oferta: false
     },
     {
         id: "audifonos",
@@ -21,7 +24,9 @@ const productos = [
         categoria: "Audio",
         precio: 59990,
         imagen: "/img/audifonos-hyperx.jpg",
-        descripcion: "Audífonos gamer con sonido envolvente."
+        descripcion: "Audífonos gamer con sonido envolvente.",
+        oferta: true,
+        precioOferta: 49990
     },
     {
         id: "mousepad",
@@ -29,7 +34,8 @@ const productos = [
         categoria: "Accesorios",
         precio: 14990,
         imagen: "/img/mousepad.jpg",
-        descripcion: "Mousepad gamer de gran tamaño para teclado y mouse."
+        descripcion: "Mousepad gamer de gran tamaño para teclado y mouse.",
+        oferta: false
     },
     {
         id: "control",
@@ -37,7 +43,9 @@ const productos = [
         categoria: "Controles",
         precio: 59990,
         imagen: "/img/control-xbox.jpg",
-        descripcion: "Control inalámbrico compatible con Xbox y PC."
+        descripcion: "Control inalámbrico compatible con Xbox y PC.",
+        oferta: true,
+        precioOferta: 52990
     },
     {
         id: "webcam",
@@ -45,7 +53,8 @@ const productos = [
         categoria: "Streaming",
         precio: 69990,
         imagen: "/img/webcam.jpg",
-        descripcion: "Webcam Full HD ideal para streaming y videollamadas."
+        descripcion: "Webcam Full HD ideal para streaming y videollamadas.",
+        oferta: false
     }
 ];
 

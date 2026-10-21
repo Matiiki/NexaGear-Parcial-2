@@ -1,7 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-function ProductoCard({ producto }) {
+function ProductoCard({ producto, agregarAlCarrito }) {
+
     return (
         <div className="col-12 col-md-6 col-lg-4 mb-4">
 
@@ -27,20 +28,48 @@ function ProductoCard({ producto }) {
                         {producto.categoria}
                     </p>
 
-                    <p className="card-text">
+                    <p>
                         {producto.descripcion}
                     </p>
 
-                    <p className="fw-bold fs-5 mt-auto">
-                        ${producto.precio.toLocaleString("es-CL")}
-                    </p>
 
+                    {/* PRECIO */}
+                    {producto.oferta ? (
+                        <>
+                            <p className="text-decoration-line-through text-muted mb-1">
+                                ${producto.precio.toLocaleString("es-CL")}
+                            </p>
+
+                            <p className="fw-bold fs-5 text-danger mt-auto">
+                                ${producto.precioOferta.toLocaleString("es-CL")}
+                            </p>
+                        </>
+                    ) : (
+                        <p className="fw-bold fs-5 mt-auto">
+                            ${producto.precio.toLocaleString("es-CL")}
+                        </p>
+                    )}
+
+
+                    {/* VER PRODUCTO */}
                     <Link
                         to={`/producto/${producto.id}`}
-                        className="btn btn-primary"
+                        className="btn btn-outline-primary mb-2"
                     >
                         Ver producto
                     </Link>
+
+
+                    {/* AGREGAR AL CARRITO */}
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={function() {
+                            agregarAlCarrito(producto);
+                        }}
+                    >
+                        Agregar al carrito
+                    </button>
 
                 </div>
 

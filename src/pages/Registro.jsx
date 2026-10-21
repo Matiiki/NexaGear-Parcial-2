@@ -161,6 +161,35 @@ function Registro() {
 
         setMensajeExito("");
 
+        const usuariosGuardados =
+    localStorage.getItem("usuariosAdmin");
+
+const usuarios =
+    usuariosGuardados
+        ? JSON.parse(usuariosGuardados)
+        : [];
+
+
+const nuevoUsuario = {
+    id: Date.now(),
+    nombre: formulario.nombre.trim(),
+    apellido: formulario.apellido.trim(),
+    correo: formulario.correo.trim().toLowerCase(),
+    fechaNacimiento: formulario.fechaNacimiento
+};
+
+
+const usuariosActualizados = [
+    ...usuarios,
+    nuevoUsuario
+];
+
+
+localStorage.setItem(
+    "usuariosAdmin",
+    JSON.stringify(usuariosActualizados)
+);
+
 
         if (!validarFormulario()) {
             return;

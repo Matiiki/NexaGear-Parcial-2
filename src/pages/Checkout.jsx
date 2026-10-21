@@ -31,6 +31,9 @@ function Checkout({ carrito }) {
 
         evento.preventDefault();
 
+        setError("");
+
+
         if (
             datos.nombre.trim() === "" ||
             datos.direccion.trim() === "" ||
@@ -39,17 +42,96 @@ function Checkout({ carrito }) {
             datos.entrega === ""
         ) {
 
-            setError("Debe completar todos los datos de envío.");
+            setError(
+                "Debe completar todos los datos de envío."
+            );
+
             return;
         }
 
 
         const pagoExitoso = true;
 
+
         if (pagoExitoso) {
-            history.push("/compra-exitosa");
+
+            const pedidosGuardados =
+                localStorage.getItem("pedidosAdmin");
+
+            const pedidos =
+                pedidosGuardados
+                    ? JSON.parse(pedidosGuardados)
+                    : [];
+
+
+            const totalPedido =
+                carrito.reduce(function(acumulado, producto) {
+
+                    return acumulado +
+                        producto.precio *
+                        producto.cantidad;
+
+                }, 0);
+
+
+            const nuevoPedido = {
+
+                id: Date.now(),
+
+                cliente:
+                    datos.nombre.trim(),
+
+                direccion:
+                    datos.direccion.trim(),
+
+                comuna:
+                    datos.comuna.trim(),
+
+                telefono:
+                    datos.telefono.trim(),
+
+                entrega:
+                    datos.entrega,
+
+                productos:
+                    carrito,
+
+                total:
+                    totalPedido,
+
+                fecha:
+                    new Date().toLocaleString(
+                        "es-CL"
+                    ),
+
+                estado:
+                    "Pendiente"
+            };
+
+
+            const pedidosActualizados = [
+                ...pedidos,
+                nuevoPedido
+            ];
+
+
+            localStorage.setItem(
+                "pedidosAdmin",
+                JSON.stringify(
+                    pedidosActualizados
+                )
+            );
+
+
+            history.push(
+                "/compra-exitosa"
+            );
+
         } else {
-            history.push("/pago-error");
+
+            history.push(
+                "/pago-error"
+            );
         }
     }
 
@@ -181,9 +263,11 @@ function Checkout({ carrito }) {
 
 
                         {error && (
+
                             <div className="alert alert-danger">
                                 {error}
                             </div>
+
                         )}
 
 

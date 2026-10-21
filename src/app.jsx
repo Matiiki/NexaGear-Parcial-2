@@ -19,6 +19,10 @@ import AdminProductos from "./pages/AdminProductos.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
 import AdminCategorias from "./pages/AdminCategorias.jsx";
 import { obtenerPrecioFinal } from "./utils/logicaNexaGear.js";
+import AdminUsuarios from "./pages/AdminUsuarios.jsx";
+import AdminPedidos from "./pages/AdminPedidos.jsx";
+import AdminReportes from "./pages/AdminReportes.jsx";
+import AdminPerfil from "./pages/AdminPerfil.jsx";
 
 function App() {
 
@@ -159,6 +163,22 @@ function App() {
 
                 <Route path="/admin/categorias">
                     <AdminCategorias />
+                </Route>
+
+                <Route path="/admin/usuarios">
+                    <AdminUsuarios />
+                </Route>
+
+                <Route path="/admin/pedidos">
+                    <AdminPedidos />
+                </Route>
+
+                <Route path="/admin/reportes">
+                    <AdminReportes />
+                </Route>
+
+                <Route path="/admin/perfil">
+                    <AdminPerfil />
                 </Route>
 
             </Switch>

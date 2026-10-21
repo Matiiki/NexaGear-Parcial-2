@@ -171,6 +171,32 @@ function AdminDashboard() {
                     </div>
 
                 </div>
+                <div className="col-12 col-md-6 col-lg-4 mb-4">
+
+    <div className="card h-100 shadow-sm">
+
+        <div className="card-body text-center">
+
+            <h2 className="h4">
+                Perfil
+            </h2>
+
+            <p>
+                Actualizar los datos del administrador.
+            </p>
+
+            <Link
+                to="/admin/perfil"
+                className="btn btn-primary"
+            >
+                Ver perfil
+            </Link>
+
+        </div>
+
+    </div>
+
+</div>
 
 
                 {/* TIENDA */}

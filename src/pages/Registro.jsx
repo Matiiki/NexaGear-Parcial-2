@@ -5,6 +5,7 @@ import {
     contrasenasCoinciden
 } from "../utils/logicaNexaGear.js";
 
+
 function Registro() {
 
     const [formulario, setFormulario] = useState({
@@ -16,7 +17,9 @@ function Registro() {
         fechaNacimiento: ""
     });
 
+
     const [errores, setErrores] = useState({});
+
     const [mensajeExito, setMensajeExito] = useState("");
 
 
@@ -28,6 +31,8 @@ function Registro() {
             ...formulario,
             [name]: value
         });
+
+        setMensajeExito("");
     }
 
 
@@ -35,14 +40,40 @@ function Registro() {
 
         const nuevosErrores = {};
 
-        const valorCorreo =
-            formulario.correo.trim().toLowerCase();
-
-        const expresionCorreo =
-            /^[a-zA-Z0-9](?:[a-zA-Z0-9._%+-]*[a-zA-Z0-9])?@[a-zA-Z0-9](?:[a-zA-Z0-9.-]*[a-zA-Z0-9])?\.[a-zA-Z]{2,}$/;
-
 
         // NOMBRE
+
+        if (formulario.nombre.trim() === "") {
+
+            nuevosErrores.nombre =
+                "El nombre es obligatorio.";
+
+        } else if (
+            formulario.nombre.trim().length < 2
+        ) {
+
+            nuevosErrores.nombre =
+                "El nombre debe tener al menos 2 caracteres.";
+        }
+
+
+        // APELLIDO
+
+        if (formulario.apellido.trim() === "") {
+
+            nuevosErrores.apellido =
+                "El apellido es obligatorio.";
+
+        } else if (
+            formulario.apellido.trim().length < 2
+        ) {
+
+            nuevosErrores.apellido =
+                "El apellido debe tener al menos 2 caracteres.";
+        }
+
+
+        // CORREO
 
         if (formulario.correo.trim() === "") {
 
@@ -58,37 +89,6 @@ function Registro() {
         }
 
 
-        // APELLIDO
-
-        if (formulario.apellido.trim() === "") {
-
-            nuevosErrores.apellido =
-                "El apellido es obligatorio.";
-
-        } else if (formulario.apellido.trim().length < 2) {
-
-            nuevosErrores.apellido =
-                "El apellido debe tener al menos 2 caracteres.";
-        }
-
-
-        // CORREO
-
-        if (valorCorreo === "") {
-
-            nuevosErrores.correo =
-                "El correo electrónico es obligatorio.";
-
-        } else if (
-            !expresionCorreo.test(valorCorreo) ||
-            valorCorreo.includes("..")
-        ) {
-
-            nuevosErrores.correo =
-                "Ingrese un correo electrónico válido.";
-        }
-
-
         // CONTRASEÑA
 
         if (formulario.contrasena === "") {
@@ -96,7 +96,9 @@ function Registro() {
             nuevosErrores.contrasena =
                 "La contraseña es obligatoria.";
 
-        } else if (formulario.contrasena.length < 8) {
+        } else if (
+            formulario.contrasena.length < 8
+        ) {
 
             nuevosErrores.contrasena =
                 "La contraseña debe tener al menos 8 caracteres.";
@@ -112,7 +114,7 @@ function Registro() {
             nuevosErrores.confirmarContrasena =
                 "Debe confirmar la contraseña.";
 
-        }else if (
+        } else if (
             !contrasenasCoinciden(
                 formulario.contrasena,
                 formulario.confirmarContrasena
@@ -126,7 +128,9 @@ function Registro() {
 
         // FECHA DE NACIMIENTO
 
-        if (formulario.fechaNacimiento === "") {
+        if (
+            formulario.fechaNacimiento === ""
+        ) {
 
             nuevosErrores.fechaNacimiento =
                 "La fecha de nacimiento es obligatoria.";
@@ -139,9 +143,13 @@ function Registro() {
                     "T00:00:00"
                 );
 
-            const fechaActual = new Date();
+            const fechaActual =
+                new Date();
 
-            if (fechaIngresada > fechaActual) {
+
+            if (
+                fechaIngresada > fechaActual
+            ) {
 
                 nuevosErrores.fechaNacimiento =
                     "La fecha de nacimiento no puede ser futura.";
@@ -151,7 +159,10 @@ function Registro() {
 
         setErrores(nuevosErrores);
 
-        return Object.keys(nuevosErrores).length === 0;
+
+        return (
+            Object.keys(nuevosErrores).length === 0
+        );
     }
 
 
@@ -161,45 +172,108 @@ function Registro() {
 
         setMensajeExito("");
 
-        const usuariosGuardados =
-    localStorage.getItem("usuariosAdmin");
 
-const usuarios =
-    usuariosGuardados
-        ? JSON.parse(usuariosGuardados)
-        : [];
-
-
-const nuevoUsuario = {
-    id: Date.now(),
-    nombre: formulario.nombre.trim(),
-    apellido: formulario.apellido.trim(),
-    correo: formulario.correo.trim().toLowerCase(),
-    fechaNacimiento: formulario.fechaNacimiento
-};
-
-
-const usuariosActualizados = [
-    ...usuarios,
-    nuevoUsuario
-];
-
-
-localStorage.setItem(
-    "usuariosAdmin",
-    JSON.stringify(usuariosActualizados)
-);
-
+        // PRIMERO VALIDAMOS
 
         if (!validarFormulario()) {
             return;
         }
 
 
+        // LEER USUARIOS GUARDADOS
+
+        const usuariosGuardados =
+            localStorage.getItem(
+                "usuariosAdmin"
+            );
+
+
+        const usuarios =
+            usuariosGuardados
+                ? JSON.parse(
+                    usuariosGuardados
+                )
+                : [];
+
+
+        // COMPROBAR CORREO DUPLICADO
+
+        const correoNormalizado =
+            formulario.correo
+                .trim()
+                .toLowerCase();
+
+
+        const correoExiste =
+            usuarios.some(function(usuario) {
+
+                return (
+                    usuario.correo
+                        .trim()
+                        .toLowerCase() ===
+                    correoNormalizado
+                );
+            });
+
+
+        if (correoExiste) {
+
+            setErrores({
+                correo:
+                    "Ya existe una cuenta registrada con este correo electrónico."
+            });
+
+            return;
+        }
+
+
+        // CREAR USUARIO
+
+        const nuevoUsuario = {
+
+            id: Date.now(),
+
+            nombre:
+                formulario.nombre.trim(),
+
+            apellido:
+                formulario.apellido.trim(),
+
+            correo:
+                correoNormalizado,
+
+            fechaNacimiento:
+                formulario.fechaNacimiento
+        };
+
+
+        // GUARDAR USUARIO
+
+        const usuariosActualizados = [
+            ...usuarios,
+            nuevoUsuario
+        ];
+
+
+        localStorage.setItem(
+            "usuariosAdmin",
+            JSON.stringify(
+                usuariosActualizados
+            )
+        );
+
+
+        // MENSAJE DE ÉXITO
+
         setMensajeExito(
             "Cuenta creada correctamente."
         );
 
+
+        setErrores({});
+
+
+        // LIMPIAR FORMULARIO
 
         setFormulario({
             nombre: "",
@@ -227,6 +301,7 @@ localStorage.setItem(
                                 Crear cuenta
                             </h1>
 
+
                             <p className="text-center text-muted mb-4">
                                 Regístrate en NexaGear para acceder
                                 a nuestros productos.
@@ -237,6 +312,7 @@ localStorage.setItem(
                                 onSubmit={manejarEnvio}
                                 noValidate
                             >
+
 
                                 {/* NOMBRE */}
 
@@ -258,15 +334,21 @@ localStorage.setItem(
                                                 ? "form-control is-invalid"
                                                 : "form-control"
                                         }
-                                        value={formulario.nombre}
-                                        onChange={manejarCambio}
+                                        value={
+                                            formulario.nombre
+                                        }
+                                        onChange={
+                                            manejarCambio
+                                        }
                                         placeholder="Ej: Matias"
                                     />
 
                                     {errores.nombre && (
+
                                         <div className="invalid-feedback">
                                             {errores.nombre}
                                         </div>
+
                                     )}
 
                                 </div>
@@ -292,15 +374,21 @@ localStorage.setItem(
                                                 ? "form-control is-invalid"
                                                 : "form-control"
                                         }
-                                        value={formulario.apellido}
-                                        onChange={manejarCambio}
+                                        value={
+                                            formulario.apellido
+                                        }
+                                        onChange={
+                                            manejarCambio
+                                        }
                                         placeholder="Ej: Acevedo"
                                     />
 
                                     {errores.apellido && (
+
                                         <div className="invalid-feedback">
                                             {errores.apellido}
                                         </div>
+
                                     )}
 
                                 </div>
@@ -326,15 +414,21 @@ localStorage.setItem(
                                                 ? "form-control is-invalid"
                                                 : "form-control"
                                         }
-                                        value={formulario.correo}
-                                        onChange={manejarCambio}
+                                        value={
+                                            formulario.correo
+                                        }
+                                        onChange={
+                                            manejarCambio
+                                        }
                                         placeholder="Ej: usuario@gmail.com"
                                     />
 
                                     {errores.correo && (
+
                                         <div className="invalid-feedback">
                                             {errores.correo}
                                         </div>
+
                                     )}
 
                                 </div>
@@ -360,15 +454,21 @@ localStorage.setItem(
                                                 ? "form-control is-invalid"
                                                 : "form-control"
                                         }
-                                        value={formulario.contrasena}
-                                        onChange={manejarCambio}
+                                        value={
+                                            formulario.contrasena
+                                        }
+                                        onChange={
+                                            manejarCambio
+                                        }
                                         placeholder="Mínimo 8 caracteres"
                                     />
 
                                     {errores.contrasena && (
+
                                         <div className="invalid-feedback">
                                             {errores.contrasena}
                                         </div>
+
                                     )}
 
                                 </div>
@@ -397,16 +497,20 @@ localStorage.setItem(
                                         value={
                                             formulario.confirmarContrasena
                                         }
-                                        onChange={manejarCambio}
+                                        onChange={
+                                            manejarCambio
+                                        }
                                         placeholder="Repite tu contraseña"
                                     />
 
                                     {errores.confirmarContrasena && (
+
                                         <div className="invalid-feedback">
                                             {
                                                 errores.confirmarContrasena
                                             }
                                         </div>
+
                                     )}
 
                                 </div>
@@ -435,15 +539,19 @@ localStorage.setItem(
                                         value={
                                             formulario.fechaNacimiento
                                         }
-                                        onChange={manejarCambio}
+                                        onChange={
+                                            manejarCambio
+                                        }
                                     />
 
                                     {errores.fechaNacimiento && (
+
                                         <div className="invalid-feedback">
                                             {
                                                 errores.fechaNacimiento
                                             }
                                         </div>
+
                                     )}
 
                                 </div>
@@ -458,11 +566,13 @@ localStorage.setItem(
 
 
                                 {mensajeExito && (
-                                    <div
-                                        className="alert alert-success mt-3 text-center"
-                                    >
+
+                                    <div className="alert alert-success mt-3 text-center">
+
                                         {mensajeExito}
+
                                     </div>
+
                                 )}
 
                             </form>

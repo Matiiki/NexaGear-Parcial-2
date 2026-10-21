@@ -1,11 +1,19 @@
 import React, { useState } from "react";
+import { useHistory, Link } from "react-router-dom";
+
+import {
+    correoEsValido
+} from "../utils/logicaNexaGear.js";
+
 
 function Login() {
 
+    const history = useHistory();
+
     const [correo, setCorreo] = useState("");
     const [contrasena, setContrasena] = useState("");
+
     const [error, setError] = useState("");
-    const [mensaje, setMensaje] = useState("");
 
 
     function manejarEnvio(evento) {
@@ -13,17 +21,124 @@ function Login() {
         evento.preventDefault();
 
         setError("");
-        setMensaje("");
 
 
-        if (correo.trim() === "" || contrasena.trim() === "") {
+        // VALIDAR CAMPOS VACÍOS
 
-            setError("Debe completar todos los campos.");
+        if (
+            correo.trim() === "" ||
+            contrasena.trim() === ""
+        ) {
+
+            setError(
+                "Debe completar todos los campos."
+            );
+
             return;
         }
 
 
-        setMensaje("Inicio de sesión realizado correctamente.");
+        // VALIDAR CORREO
+
+        if (!correoEsValido(correo)) {
+
+            setError(
+                "Ingrese un correo electrónico válido."
+            );
+
+            return;
+        }
+
+
+        // VALIDAR CONTRASEÑA
+
+        if (contrasena.length < 8) {
+
+            setError(
+                "La contraseña debe tener al menos 8 caracteres."
+            );
+
+            return;
+        }
+
+
+        // OBTENER USUARIOS REGISTRADOS
+
+        const usuariosGuardados =
+            localStorage.getItem(
+                "usuariosAdmin"
+            );
+
+
+        const usuarios =
+            usuariosGuardados
+                ? JSON.parse(
+                    usuariosGuardados
+                )
+                : [];
+
+
+        const correoNormalizado =
+            correo
+                .trim()
+                .toLowerCase();
+
+
+        // BUSCAR USUARIO
+
+        const usuarioEncontrado =
+            usuarios.find(function(usuario) {
+
+                return (
+                    usuario.correo
+                        .trim()
+                        .toLowerCase() ===
+                    correoNormalizado
+                );
+            });
+
+
+        // SI NO EXISTE
+
+        if (!usuarioEncontrado) {
+
+            setError(
+                "No existe una cuenta registrada con este correo."
+            );
+
+            return;
+        }
+
+
+        // CREAR SESIÓN
+
+        const sesionUsuario = {
+
+            id:
+                usuarioEncontrado.id,
+
+            nombre:
+                usuarioEncontrado.nombre,
+
+            apellido:
+                usuarioEncontrado.apellido,
+
+            correo:
+                usuarioEncontrado.correo
+        };
+
+
+        localStorage.setItem(
+            "sesionUsuario",
+            JSON.stringify(
+                sesionUsuario
+            )
+        );
+
+
+        // IR AL INICIO
+
+        history.push("/");
     }
 
 
@@ -38,12 +153,23 @@ function Login() {
 
                         <div className="card-body p-4">
 
-                            <h1 className="text-center mb-4">
+                            <h1 className="text-center mb-3">
                                 Iniciar sesión
                             </h1>
 
 
-                            <form onSubmit={manejarEnvio}>
+                            <p className="text-center text-muted mb-4">
+                                Ingresa a tu cuenta NexaGear.
+                            </p>
+
+
+                            <form
+                                onSubmit={manejarEnvio}
+                                noValidate
+                            >
+
+
+                                {/* CORREO */}
 
                                 <div className="mb-3">
 
@@ -51,7 +177,7 @@ function Login() {
                                         htmlFor="correo-login"
                                         className="form-label"
                                     >
-                                        Correo
+                                        Correo electrónico
                                     </label>
 
                                     <input
@@ -60,12 +186,21 @@ function Login() {
                                         className="form-control"
                                         value={correo}
                                         onChange={function(evento) {
-                                            setCorreo(evento.target.value);
+
+                                            setCorreo(
+                                                evento.target.value
+                                            );
+
+                                            setError("");
+
                                         }}
+                                        placeholder="usuario@gmail.com"
                                     />
 
                                 </div>
 
+
+                                {/* CONTRASEÑA */}
 
                                 <div className="mb-3">
 
@@ -82,11 +217,29 @@ function Login() {
                                         className="form-control"
                                         value={contrasena}
                                         onChange={function(evento) {
-                                            setContrasena(evento.target.value);
+
+                                            setContrasena(
+                                                evento.target.value
+                                            );
+
+                                            setError("");
+
                                         }}
+                                        placeholder="Mínimo 8 caracteres"
                                     />
 
                                 </div>
+
+
+                                {/* ERROR */}
+
+                                {error && (
+
+                                    <div className="alert alert-danger">
+                                        {error}
+                                    </div>
+
+                                )}
 
 
                                 <button
@@ -97,18 +250,17 @@ function Login() {
                                 </button>
 
 
-                                {error && (
-                                    <div className="alert alert-danger mt-3">
-                                        {error}
-                                    </div>
-                                )}
+                                <div className="text-center mt-3">
 
+                                    <span>
+                                        ¿No tienes una cuenta?{" "}
+                                    </span>
 
-                                {mensaje && (
-                                    <div className="alert alert-success mt-3">
-                                        {mensaje}
-                                    </div>
-                                )}
+                                    <Link to="/registro">
+                                        Regístrate
+                                    </Link>
+
+                                </div>
 
                             </form>
 

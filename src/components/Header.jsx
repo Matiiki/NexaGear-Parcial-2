@@ -1,19 +1,88 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, {
+    useEffect,
+    useState
+} from "react";
+
+import {
+    Link,
+    useHistory,
+    useLocation
+} from "react-router-dom";
+
 
 function Header({ carrito }) {
 
+    const history = useHistory();
+
+    const location = useLocation();
+
+    const [usuario, setUsuario] =
+        useState(null);
+
+
+    function obtenerSesion() {
+
+        const sesionGuardada =
+            localStorage.getItem(
+                "sesionUsuario"
+            );
+
+
+        if (sesionGuardada) {
+
+            setUsuario(
+                JSON.parse(sesionGuardada)
+            );
+
+        } else {
+
+            setUsuario(null);
+        }
+    }
+
+
+    useEffect(function() {
+
+        obtenerSesion();
+
+    }, [location.pathname]);
+
+
+    function cerrarSesion() {
+
+        localStorage.removeItem(
+            "sesionUsuario"
+        );
+
+        setUsuario(null);
+
+        history.replace("/");
+    }
+
+
     const cantidadTotal =
-        carrito.reduce(function(total, producto) {
-            return total + producto.cantidad;
-        }, 0);
+        carrito.reduce(
+            function(total, producto) {
+
+                return (
+                    total +
+                    producto.cantidad
+                );
+            },
+            0
+        );
+
 
     return (
         <header className="navbar navbar-expand-lg navbar-dark bg-dark px-4">
 
-            <Link className="navbar-brand fw-bold" to="/">
+            <Link
+                className="navbar-brand fw-bold"
+                to="/"
+            >
                 NexaGear
             </Link>
+
 
             <button
                 className="navbar-toggler"
@@ -24,6 +93,7 @@ function Header({ carrito }) {
                 <span className="navbar-toggler-icon"></span>
             </button>
 
+
             <div
                 className="collapse navbar-collapse"
                 id="menuPrincipal"
@@ -31,64 +101,126 @@ function Header({ carrito }) {
 
                 <ul className="navbar-nav mx-auto">
 
+
                     <li className="nav-item">
-                        <Link className="nav-link" to="/">
+
+                        <Link
+                            className="nav-link"
+                            to="/"
+                        >
                             Inicio
                         </Link>
+
                     </li>
 
+
                     <li className="nav-item">
-                        <Link className="nav-link" to="/productos">
+
+                        <Link
+                            className="nav-link"
+                            to="/productos"
+                        >
                             Productos
                         </Link>
+
                     </li>
 
-                    <li className="nav-item">
-                        <Link className="nav-link" to="/registro"
 
+                    <li className="nav-item">
+
+                        <Link
+                            className="nav-link"
+                            to="/categorias"
                         >
-                            Registro
+                            Categorías
                         </Link>
+
                     </li>
 
+
                     <li className="nav-item">
-                        <Link className="nav-link" to="/contacto"
-                        
+
+                        <Link
+                            className="nav-link"
+                            to="/ofertas"
+                        >
+                            Ofertas
+                        </Link>
+
+                    </li>
+
+
+                    <li className="nav-item">
+
+                        <Link
+                            className="nav-link"
+                            to="/contacto"
                         >
                             Contacto
                         </Link>
-                    </li>
-                    <li className="nav-item">
-                        <Link className="nav-link" to="/categorias">
-                            Categorías
-                        </Link>
-                    </li>
 
-                    <li className="nav-item">
-                        <Link className="nav-link" to="/ofertas">
-                            Ofertas
-                        </Link>
-                    </li>
-                    
-                    <li className="nav-item">
-                        <Link className="nav-link" to="/login">
-                            Iniciar sesión
-                        </Link>
-                    </li>
-                    <li className="nav-item">
-                        <Link className="nav-link" to="/admin">
-                            Admin
-                        </Link>
                     </li>
 
                 </ul>
 
-                <Link
-                    className="btn btn-outline-light"
-                    to="/carrito"
-                >
-                    🛒 Carrito ({cantidadTotal})
-                </Link>
+
+                <div className="d-flex flex-wrap align-items-center gap-2">
+
+
+                    {usuario ? (
+
+                        <>
+
+                            <span className="text-light">
+
+                                Hola,{" "}
+                                {usuario.nombre}
+
+                            </span>
+
+
+                            <button
+                                type="button"
+                                className="btn btn-outline-danger"
+                                onClick={cerrarSesion}
+                            >
+                                Cerrar sesión
+                            </button>
+
+                        </>
+
+                    ) : (
+
+                        <>
+
+                            <Link
+                                to="/login"
+                                className="btn btn-outline-light"
+                            >
+                                Iniciar sesión
+                            </Link>
+
+
+                            <Link
+                                to="/registro"
+                                className="btn btn-outline-light"
+                            >
+                                Registro
+                            </Link>
+
+                        </>
+
+                    )}
+
+
+                    <Link
+                        to="/carrito"
+                        className="btn btn-primary"
+                    >
+                        🛒 Carrito ({cantidadTotal})
+                    </Link>
+
+                </div>
 
             </div>
 

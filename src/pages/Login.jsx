@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { useHistory, Link } from "react-router-dom";
+import {
+    Link,
+    useHistory
+} from "react-router-dom";
 
 import {
     correoEsValido
@@ -12,7 +15,6 @@ function Login() {
 
     const [correo, setCorreo] = useState("");
     const [contrasena, setContrasena] = useState("");
-
     const [error, setError] = useState("");
 
 
@@ -22,8 +24,6 @@ function Login() {
 
         setError("");
 
-
-        // VALIDAR CAMPOS VACÍOS
 
         if (
             correo.trim() === "" ||
@@ -38,8 +38,6 @@ function Login() {
         }
 
 
-        // VALIDAR CORREO
-
         if (!correoEsValido(correo)) {
 
             setError(
@@ -49,8 +47,6 @@ function Login() {
             return;
         }
 
-
-        // VALIDAR CONTRASEÑA
 
         if (contrasena.length < 8) {
 
@@ -62,34 +58,25 @@ function Login() {
         }
 
 
-        // OBTENER USUARIOS REGISTRADOS
-
         const usuariosGuardados =
-            localStorage.getItem(
-                "usuariosAdmin"
-            );
+            localStorage.getItem("usuariosAdmin");
 
 
         const usuarios =
             usuariosGuardados
-                ? JSON.parse(
-                    usuariosGuardados
-                )
+                ? JSON.parse(usuariosGuardados)
                 : [];
 
 
         const correoNormalizado =
-            correo
-                .trim()
-                .toLowerCase();
+            correo.trim().toLowerCase();
 
-
-        // BUSCAR USUARIO
 
         const usuarioEncontrado =
             usuarios.find(function(usuario) {
 
                 return (
+                    usuario.correo &&
                     usuario.correo
                         .trim()
                         .toLowerCase() ===
@@ -97,8 +84,6 @@ function Login() {
                 );
             });
 
-
-        // SI NO EXISTE
 
         if (!usuarioEncontrado) {
 
@@ -109,8 +94,6 @@ function Login() {
             return;
         }
 
-
-        // CREAR SESIÓN
 
         const sesionUsuario = {
 
@@ -130,15 +113,11 @@ function Login() {
 
         localStorage.setItem(
             "sesionUsuario",
-            JSON.stringify(
-                sesionUsuario
-            )
+            JSON.stringify(sesionUsuario)
         );
 
 
-        // IR AL INICIO
-
-        history.push("/");
+        history.replace("/");
     }
 
 
@@ -157,7 +136,6 @@ function Login() {
                                 Iniciar sesión
                             </h1>
 
-
                             <p className="text-center text-muted mb-4">
                                 Ingresa a tu cuenta NexaGear.
                             </p>
@@ -167,9 +145,6 @@ function Login() {
                                 onSubmit={manejarEnvio}
                                 noValidate
                             >
-
-
-                                {/* CORREO */}
 
                                 <div className="mb-3">
 
@@ -192,15 +167,12 @@ function Login() {
                                             );
 
                                             setError("");
-
                                         }}
                                         placeholder="usuario@gmail.com"
                                     />
 
                                 </div>
 
-
-                                {/* CONTRASEÑA */}
 
                                 <div className="mb-3">
 
@@ -223,15 +195,12 @@ function Login() {
                                             );
 
                                             setError("");
-
                                         }}
                                         placeholder="Mínimo 8 caracteres"
                                     />
 
                                 </div>
 
-
-                                {/* ERROR */}
 
                                 {error && (
 
@@ -252,9 +221,7 @@ function Login() {
 
                                 <div className="text-center mt-3">
 
-                                    <span>
-                                        ¿No tienes una cuenta?{" "}
-                                    </span>
+                                    ¿No tienes una cuenta?{" "}
 
                                     <Link to="/registro">
                                         Regístrate

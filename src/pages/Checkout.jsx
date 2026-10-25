@@ -1,9 +1,18 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 
-function Checkout({ carrito, setCarrito }) {
+import {
+    obtenerProductos
+} from "../services/productosService.js";
+
+
+function Checkout({
+    carrito,
+    setCarrito
+}) {
 
     const history = useHistory();
+
 
     const [datos, setDatos] = useState(function() {
 
@@ -15,7 +24,9 @@ function Checkout({ carrito, setCarrito }) {
                 ? JSON.parse(sesionGuardada)
                 : null;
 
+
         return {
+
             nombre: usuario
                 ? usuario.nombre + " " + usuario.apellido
                 : "",
@@ -31,17 +42,33 @@ function Checkout({ carrito, setCarrito }) {
         };
     });
 
-    const [errores, setErrores] = useState({});
+
+    const [errores, setErrores] =
+        useState({});
+
+
+    function soloLetras(valor) {
+
+        return valor.replace(
+            /[^a-zA-ZÁÉÍÓÚáéíóúÑñÜü\s'-]/g,
+            ""
+        );
+    }
 
 
     function manejarCambio(evento) {
 
-        const { name, value } = evento.target;
+        const {
+            name,
+            value
+        } = evento.target;
+
 
         setDatos({
             ...datos,
             [name]: value
         });
+
 
         setErrores({
             ...errores,
@@ -50,15 +77,62 @@ function Checkout({ carrito, setCarrito }) {
     }
 
 
+    function manejarNombre(evento) {
+
+        const valor =
+            soloLetras(
+                evento.target.value
+            );
+
+
+        setDatos({
+            ...datos,
+            nombre: valor
+        });
+
+
+        setErrores({
+            ...errores,
+            nombre: ""
+        });
+    }
+
+
+    function manejarComuna(evento) {
+
+        const valor =
+            soloLetras(
+                evento.target.value
+            );
+
+
+        setDatos({
+            ...datos,
+            comuna: valor
+        });
+
+
+        setErrores({
+            ...errores,
+            comuna: ""
+        });
+    }
+
+
     function manejarTelefono(evento) {
 
         const soloNumeros =
-            evento.target.value.replace(/\D/g, "");
+            evento.target.value.replace(
+                /\D/g,
+                ""
+            );
+
 
         setDatos({
             ...datos,
             telefono: soloNumeros
         });
+
 
         setErrores({
             ...errores,
@@ -71,13 +145,31 @@ function Checkout({ carrito, setCarrito }) {
 
         const nuevosErrores = {};
 
-        if (datos.nombre.trim() === "") {
+        const regexNombre =
+            /^[a-zA-ZÁÉÍÓÚáéíóúÑñÜü\s'-]{2,}$/;
+
+
+        if (
+            datos.nombre.trim() === ""
+        ) {
+
             nuevosErrores.nombre =
                 "Ingrese su nombre completo.";
+
+        } else if (
+            !regexNombre.test(
+                datos.nombre.trim()
+            )
+        ) {
+
+            nuevosErrores.nombre =
+                "El nombre solo puede contener letras.";
         }
 
 
-        if (datos.correo.trim() === "") {
+        if (
+            datos.correo.trim() === ""
+        ) {
 
             nuevosErrores.correo =
                 "Ingrese su correo electrónico.";
@@ -87,7 +179,12 @@ function Checkout({ carrito, setCarrito }) {
             const regexCorreo =
                 /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-            if (!regexCorreo.test(datos.correo)) {
+
+            if (
+                !regexCorreo.test(
+                    datos.correo
+                )
+            ) {
 
                 nuevosErrores.correo =
                     "Ingrese un correo electrónico válido.";
@@ -95,39 +192,187 @@ function Checkout({ carrito, setCarrito }) {
         }
 
 
-        if (datos.direccion.trim() === "") {
+        if (
+            datos.direccion.trim() === ""
+        ) {
+
             nuevosErrores.direccion =
                 "Ingrese su dirección.";
         }
 
 
-        if (datos.comuna.trim() === "") {
+        if (
+            datos.comuna.trim() === ""
+        ) {
+
             nuevosErrores.comuna =
                 "Ingrese su comuna.";
+
+        } else if (
+            !regexNombre.test(
+                datos.comuna.trim()
+            )
+        ) {
+
+            nuevosErrores.comuna =
+                "La comuna solo puede contener letras.";
         }
 
 
-        if (datos.telefono.trim() === "") {
+        if (
+            datos.telefono.trim() === ""
+        ) {
 
             nuevosErrores.telefono =
                 "Ingrese su teléfono.";
 
-        } else if (!/^[0-9]{9}$/.test(datos.telefono)) {
+        } else if (
+            !/^[0-9]{9}$/.test(
+                datos.telefono
+            )
+        ) {
 
             nuevosErrores.telefono =
                 "El teléfono debe contener exactamente 9 números.";
         }
 
 
-        if (datos.entrega === "") {
+        if (
+            datos.entrega === ""
+        ) {
+
             nuevosErrores.entrega =
                 "Seleccione un tipo de entrega.";
         }
 
 
-        setErrores(nuevosErrores);
+        setErrores(
+            nuevosErrores
+        );
 
-        return Object.keys(nuevosErrores).length === 0;
+
+        return (
+            Object.keys(
+                nuevosErrores
+            ).length === 0
+        );
+    }
+
+
+    function validarStockActual() {
+
+        const productosActuales =
+            obtenerProductos();
+
+
+        for (
+            let i = 0;
+            i < carrito.length;
+            i++
+        ) {
+
+            const productoCarrito =
+                carrito[i];
+
+
+            const productoActual =
+                productosActuales.find(
+                    function(producto) {
+
+                        return (
+                            producto.id ===
+                            productoCarrito.id
+                        );
+                    }
+                );
+
+
+            if (!productoActual) {
+
+                window.alert(
+                    "Uno de los productos ya no está disponible."
+                );
+
+                return false;
+            }
+
+
+            const stockActual =
+                Number(
+                    productoActual.stock
+                );
+
+
+            if (
+                stockActual <
+                productoCarrito.cantidad
+            ) {
+
+                window.alert(
+                    "No hay stock suficiente de " +
+                    productoActual.nombre +
+                    ". Stock disponible: " +
+                    stockActual
+                );
+
+                return false;
+            }
+        }
+
+
+        return true;
+    }
+
+
+    function descontarStock() {
+
+        const productosActuales =
+            obtenerProductos();
+
+
+        const productosActualizados =
+            productosActuales.map(
+                function(producto) {
+
+                    const productoComprado =
+                        carrito.find(
+                            function(item) {
+
+                                return (
+                                    item.id ===
+                                    producto.id
+                                );
+                            }
+                        );
+
+
+                    if (
+                        productoComprado
+                    ) {
+
+                        return {
+                            ...producto,
+
+                            stock:
+                                Number(
+                                    producto.stock
+                                ) -
+                                productoComprado.cantidad
+                        };
+                    }
+
+
+                    return producto;
+                }
+            );
+
+
+        localStorage.setItem(
+            "productosAdmin",
+            JSON.stringify(
+                productosActualizados
+            )
+        );
     }
 
 
@@ -135,26 +380,44 @@ function Checkout({ carrito, setCarrito }) {
 
         evento.preventDefault();
 
-        if (!validarFormulario()) {
+
+        if (
+            !validarFormulario()
+        ) {
+
+            return;
+        }
+
+
+        if (
+            !validarStockActual()
+        ) {
+
             return;
         }
 
 
         const totalPedido =
-            carrito.reduce(function(acumulado, producto) {
+            carrito.reduce(
+                function(
+                    acumulado,
+                    producto
+                ) {
 
-                return (
-                    acumulado +
-                    producto.precio *
-                    producto.cantidad
-                );
-
-            }, 0);
+                    return (
+                        acumulado +
+                        producto.precio *
+                        producto.cantidad
+                    );
+                },
+                0
+            );
 
 
         const nuevoPedido = {
 
-            id: Date.now(),
+            id:
+                Date.now(),
 
             cliente:
                 datos.nombre.trim(),
@@ -181,7 +444,10 @@ function Checkout({ carrito, setCarrito }) {
                 totalPedido,
 
             fecha:
-                new Date().toLocaleString("es-CL"),
+                new Date()
+                    .toLocaleString(
+                        "es-CL"
+                    ),
 
             estado:
                 "Pendiente"
@@ -189,12 +455,16 @@ function Checkout({ carrito, setCarrito }) {
 
 
         const pedidosGuardados =
-            localStorage.getItem("pedidosAdmin");
+            localStorage.getItem(
+                "pedidosAdmin"
+            );
 
 
         const pedidos =
             pedidosGuardados
-                ? JSON.parse(pedidosGuardados)
+                ? JSON.parse(
+                    pedidosGuardados
+                )
                 : [];
 
 
@@ -209,19 +479,30 @@ function Checkout({ carrito, setCarrito }) {
 
         localStorage.setItem(
             "ultimoPedido",
-            JSON.stringify(nuevoPedido)
+            JSON.stringify(
+                nuevoPedido
+            )
         );
+
+
+        descontarStock();
 
 
         setCarrito([]);
 
-        history.push("/compra-exitosa");
+
+        history.push(
+            "/compra-exitosa"
+        );
     }
 
 
-    if (carrito.length === 0) {
+    if (
+        carrito.length === 0
+    ) {
 
         return (
+
             <main className="container py-5 text-center">
 
                 <h1>
@@ -229,11 +510,13 @@ function Checkout({ carrito, setCarrito }) {
                 </h1>
 
             </main>
+
         );
     }
 
 
     return (
+
         <main className="container py-5">
 
             <div className="row justify-content-center">
@@ -246,11 +529,12 @@ function Checkout({ carrito, setCarrito }) {
 
 
                     <form
-                        onSubmit={finalizarCompra}
+                        onSubmit={
+                            finalizarCompra
+                        }
                         noValidate
                     >
 
-                        {/* NOMBRE */}
 
                         <div className="mb-3">
 
@@ -263,12 +547,18 @@ function Checkout({ carrito, setCarrito }) {
                                 name="nombre"
                                 className={
                                     "form-control " +
-                                    (errores.nombre
-                                        ? "is-invalid"
-                                        : "")
+                                    (
+                                        errores.nombre
+                                            ? "is-invalid"
+                                            : ""
+                                    )
                                 }
-                                value={datos.nombre}
-                                onChange={manejarCambio}
+                                value={
+                                    datos.nombre
+                                }
+                                onChange={
+                                    manejarNombre
+                                }
                             />
 
                             {errores.nombre && (
@@ -282,8 +572,6 @@ function Checkout({ carrito, setCarrito }) {
                         </div>
 
 
-                        {/* CORREO */}
-
                         <div className="mb-3">
 
                             <label className="form-label">
@@ -295,12 +583,18 @@ function Checkout({ carrito, setCarrito }) {
                                 name="correo"
                                 className={
                                     "form-control " +
-                                    (errores.correo
-                                        ? "is-invalid"
-                                        : "")
+                                    (
+                                        errores.correo
+                                            ? "is-invalid"
+                                            : ""
+                                    )
                                 }
-                                value={datos.correo}
-                                onChange={manejarCambio}
+                                value={
+                                    datos.correo
+                                }
+                                onChange={
+                                    manejarCambio
+                                }
                             />
 
                             {errores.correo && (
@@ -314,8 +608,6 @@ function Checkout({ carrito, setCarrito }) {
                         </div>
 
 
-                        {/* DIRECCIÓN */}
-
                         <div className="mb-3">
 
                             <label className="form-label">
@@ -327,12 +619,18 @@ function Checkout({ carrito, setCarrito }) {
                                 name="direccion"
                                 className={
                                     "form-control " +
-                                    (errores.direccion
-                                        ? "is-invalid"
-                                        : "")
+                                    (
+                                        errores.direccion
+                                            ? "is-invalid"
+                                            : ""
+                                    )
                                 }
-                                value={datos.direccion}
-                                onChange={manejarCambio}
+                                value={
+                                    datos.direccion
+                                }
+                                onChange={
+                                    manejarCambio
+                                }
                             />
 
                             {errores.direccion && (
@@ -346,8 +644,6 @@ function Checkout({ carrito, setCarrito }) {
                         </div>
 
 
-                        {/* COMUNA */}
-
                         <div className="mb-3">
 
                             <label className="form-label">
@@ -359,12 +655,18 @@ function Checkout({ carrito, setCarrito }) {
                                 name="comuna"
                                 className={
                                     "form-control " +
-                                    (errores.comuna
-                                        ? "is-invalid"
-                                        : "")
+                                    (
+                                        errores.comuna
+                                            ? "is-invalid"
+                                            : ""
+                                    )
                                 }
-                                value={datos.comuna}
-                                onChange={manejarCambio}
+                                value={
+                                    datos.comuna
+                                }
+                                onChange={
+                                    manejarComuna
+                                }
                             />
 
                             {errores.comuna && (
@@ -378,8 +680,6 @@ function Checkout({ carrito, setCarrito }) {
                         </div>
 
 
-                        {/* TELÉFONO */}
-
                         <div className="mb-3">
 
                             <label className="form-label">
@@ -391,15 +691,21 @@ function Checkout({ carrito, setCarrito }) {
                                 name="telefono"
                                 className={
                                     "form-control " +
-                                    (errores.telefono
-                                        ? "is-invalid"
-                                        : "")
+                                    (
+                                        errores.telefono
+                                            ? "is-invalid"
+                                            : ""
+                                    )
                                 }
-                                value={datos.telefono}
+                                value={
+                                    datos.telefono
+                                }
                                 maxLength="9"
                                 inputMode="numeric"
                                 placeholder="912345678"
-                                onChange={manejarTelefono}
+                                onChange={
+                                    manejarTelefono
+                                }
                             />
 
                             {errores.telefono && (
@@ -413,8 +719,6 @@ function Checkout({ carrito, setCarrito }) {
                         </div>
 
 
-                        {/* ENTREGA */}
-
                         <div className="mb-3">
 
                             <label className="form-label">
@@ -425,12 +729,18 @@ function Checkout({ carrito, setCarrito }) {
                                 name="entrega"
                                 className={
                                     "form-select " +
-                                    (errores.entrega
-                                        ? "is-invalid"
-                                        : "")
+                                    (
+                                        errores.entrega
+                                            ? "is-invalid"
+                                            : ""
+                                    )
                                 }
-                                value={datos.entrega}
-                                onChange={manejarCambio}
+                                value={
+                                    datos.entrega
+                                }
+                                onChange={
+                                    manejarCambio
+                                }
                             >
 
                                 <option value="">
@@ -472,7 +782,9 @@ function Checkout({ carrito, setCarrito }) {
             </div>
 
         </main>
+
     );
 }
+
 
 export default Checkout;

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 import productosIniciales from "../data/productos.js";
 
+
 function AdminProductos() {
 
     const [productos, setProductos] = useState(function() {
@@ -9,17 +10,36 @@ function AdminProductos() {
         const productosGuardados =
             localStorage.getItem("productosAdmin");
 
-        return productosGuardados
-            ? JSON.parse(productosGuardados)
-            : productosIniciales;
+
+        const lista =
+            productosGuardados
+                ? JSON.parse(productosGuardados)
+                : productosIniciales;
+
+
+        return lista.map(function(producto) {
+
+            return {
+                ...producto,
+
+                stock:
+                    producto.stock === undefined ||
+                    producto.stock === null
+                        ? 10
+                        : Number(producto.stock)
+            };
+
+        });
     });
 
 
     const [formulario, setFormulario] = useState({
+
         id: "",
         nombre: "",
         categoria: "",
         precio: "",
+        stock: "",
         imagen: "",
         descripcion: "",
         oferta: false,
@@ -27,29 +47,37 @@ function AdminProductos() {
     });
 
 
-    const [editando, setEditando] = useState(false);
+    const [editando, setEditando] =
+        useState(false);
 
-    const [error, setError] = useState("");
+    const [error, setError] =
+        useState("");
 
-
-    // CATEGORÍAS DISPONIBLES
 
     const categoriasGuardadas =
-        localStorage.getItem("categoriasAdmin");
+        localStorage.getItem(
+            "categoriasAdmin"
+        );
+
 
     const categorias =
         categoriasGuardadas
             ? JSON.parse(categoriasGuardadas)
             : [
                 ...new Set(
-                    productos.map(function(producto) {
-                        return producto.categoria;
-                    })
+                    productos.map(
+                        function(producto) {
+
+                            return producto.categoria;
+                        }
+                    )
                 )
             ];
 
 
-    function guardarProductos(nuevosProductos) {
+    function guardarProductos(
+        nuevosProductos
+    ) {
 
         setProductos(nuevosProductos);
 
@@ -62,30 +90,43 @@ function AdminProductos() {
 
     function manejarCambio(evento) {
 
-        const { name, value, type, checked } = evento.target;
+        const {
+            name,
+            value,
+            type,
+            checked
+        } = evento.target;
+
 
         setFormulario({
             ...formulario,
+
             [name]:
                 type === "checkbox"
                     ? checked
                     : value
         });
+
+
+        setError("");
     }
 
 
     function limpiarFormulario() {
 
         setFormulario({
+
             id: "",
             nombre: "",
             categoria: "",
             precio: "",
+            stock: "",
             imagen: "",
             descripcion: "",
             oferta: false,
             precioOferta: ""
         });
+
 
         setEditando(false);
 
@@ -98,21 +139,39 @@ function AdminProductos() {
         if (
             formulario.nombre.trim() === "" ||
             formulario.categoria.trim() === "" ||
-            formulario.precio === ""
+            formulario.precio === "" ||
+            formulario.stock === ""
         ) {
 
             setError(
-                "Nombre, categoría y precio son obligatorios."
+                "Nombre, categoría, precio y stock son obligatorios."
             );
 
             return false;
         }
 
 
-        if (Number(formulario.precio) <= 0) {
+        if (
+            Number(formulario.precio) <= 0
+        ) {
 
             setError(
                 "El precio debe ser mayor a 0."
+            );
+
+            return false;
+        }
+
+
+        if (
+            Number(formulario.stock) < 0 ||
+            !Number.isInteger(
+                Number(formulario.stock)
+            )
+        ) {
+
+            setError(
+                "El stock debe ser un número entero igual o mayor a 0."
             );
 
             return false;
@@ -134,7 +193,9 @@ function AdminProductos() {
 
         if (
             formulario.oferta &&
-            Number(formulario.precioOferta) >=
+            Number(
+                formulario.precioOferta
+            ) >=
             Number(formulario.precio)
         ) {
 
@@ -183,6 +244,9 @@ function AdminProductos() {
             precio:
                 Number(formulario.precio),
 
+            stock:
+                Number(formulario.stock),
+
             imagen:
                 formulario.imagen.trim() !== ""
                     ? formulario.imagen.trim()
@@ -196,7 +260,9 @@ function AdminProductos() {
 
             precioOferta:
                 formulario.oferta
-                    ? Number(formulario.precioOferta)
+                    ? Number(
+                        formulario.precioOferta
+                    )
                     : null
         };
 
@@ -207,25 +273,51 @@ function AdminProductos() {
         ];
 
 
-        guardarProductos(nuevosProductos);
+        guardarProductos(
+            nuevosProductos
+        );
+
 
         limpiarFormulario();
     }
 
 
-    function cargarProductoParaEditar(producto) {
+    function cargarProductoParaEditar(
+        producto
+    ) {
 
         setFormulario({
-            id: producto.id,
-            nombre: producto.nombre,
-            categoria: producto.categoria,
-            precio: producto.precio,
-            imagen: producto.imagen,
-            descripcion: producto.descripcion,
-            oferta: producto.oferta || false,
+
+            id:
+                producto.id,
+
+            nombre:
+                producto.nombre,
+
+            categoria:
+                producto.categoria,
+
+            precio:
+                producto.precio,
+
+            stock:
+                producto.stock === undefined
+                    ? 10
+                    : producto.stock,
+
+            imagen:
+                producto.imagen,
+
+            descripcion:
+                producto.descripcion,
+
+            oferta:
+                producto.oferta || false,
+
             precioOferta:
                 producto.precioOferta || ""
         });
+
 
         setEditando(true);
 
@@ -233,7 +325,9 @@ function AdminProductos() {
     }
 
 
-    function actualizarProducto(evento) {
+    function actualizarProducto(
+        evento
+    ) {
 
         evento.preventDefault();
 
@@ -246,45 +340,63 @@ function AdminProductos() {
 
 
         const productosActualizados =
-            productos.map(function(producto) {
+            productos.map(
+                function(producto) {
 
-                if (producto.id === formulario.id) {
+                    if (
+                        producto.id ===
+                        formulario.id
+                    ) {
 
-                    return {
-                        ...producto,
+                        return {
+                            ...producto,
 
-                        nombre:
-                            formulario.nombre.trim(),
+                            nombre:
+                                formulario.nombre.trim(),
 
-                        categoria:
-                            formulario.categoria.trim(),
+                            categoria:
+                                formulario.categoria.trim(),
 
-                        precio:
-                            Number(formulario.precio),
+                            precio:
+                                Number(
+                                    formulario.precio
+                                ),
 
-                        imagen:
-                            formulario.imagen.trim(),
+                            stock:
+                                Number(
+                                    formulario.stock
+                                ),
 
-                        descripcion:
-                            formulario.descripcion.trim(),
+                            imagen:
+                                formulario.imagen.trim() !== ""
+                                    ? formulario.imagen.trim()
+                                    : "/img/mouse-logitech.jpg",
 
-                        oferta:
-                            formulario.oferta,
+                            descripcion:
+                                formulario.descripcion.trim(),
 
-                        precioOferta:
-                            formulario.oferta
-                                ? Number(
-                                    formulario.precioOferta
-                                )
-                                : null
-                    };
+                            oferta:
+                                formulario.oferta,
+
+                            precioOferta:
+                                formulario.oferta
+                                    ? Number(
+                                        formulario.precioOferta
+                                    )
+                                    : null
+                        };
+                    }
+
+
+                    return producto;
                 }
-
-                return producto;
-            });
+            );
 
 
-        guardarProductos(productosActualizados);
+        guardarProductos(
+            productosActualizados
+        );
+
 
         limpiarFormulario();
     }
@@ -304,17 +416,24 @@ function AdminProductos() {
 
 
         const productosFiltrados =
-            productos.filter(function(producto) {
+            productos.filter(
+                function(producto) {
 
-                return producto.id !== id;
-            });
+                    return (
+                        producto.id !== id
+                    );
+                }
+            );
 
 
-        guardarProductos(productosFiltrados);
+        guardarProductos(
+            productosFiltrados
+        );
     }
 
 
     return (
+
         <main className="container py-5">
 
             <h1 className="text-center mb-4">
@@ -358,8 +477,12 @@ function AdminProductos() {
                                     type="text"
                                     name="nombre"
                                     className="form-control"
-                                    value={formulario.nombre}
-                                    onChange={manejarCambio}
+                                    value={
+                                        formulario.nombre
+                                    }
+                                    onChange={
+                                        manejarCambio
+                                    }
                                 />
 
                             </div>
@@ -376,26 +499,38 @@ function AdminProductos() {
                                 <select
                                     name="categoria"
                                     className="form-select"
-                                    value={formulario.categoria}
-                                    onChange={manejarCambio}
+                                    value={
+                                        formulario.categoria
+                                    }
+                                    onChange={
+                                        manejarCambio
+                                    }
                                 >
 
                                     <option value="">
                                         Seleccione una categoría
                                     </option>
 
-                                    {categorias.map(function(categoria) {
 
-                                        return (
-                                            <option
-                                                key={categoria}
-                                                value={categoria}
-                                            >
-                                                {categoria}
-                                            </option>
-                                        );
+                                    {categorias.map(
+                                        function(categoria) {
 
-                                    })}
+                                            return (
+
+                                                <option
+                                                    key={
+                                                        categoria
+                                                    }
+                                                    value={
+                                                        categoria
+                                                    }
+                                                >
+                                                    {categoria}
+                                                </option>
+
+                                            );
+                                        }
+                                    )}
 
                                 </select>
 
@@ -415,9 +550,42 @@ function AdminProductos() {
                                     name="precio"
                                     min="1"
                                     className="form-control"
-                                    value={formulario.precio}
-                                    onChange={manejarCambio}
+                                    value={
+                                        formulario.precio
+                                    }
+                                    onChange={
+                                        manejarCambio
+                                    }
                                 />
+
+                            </div>
+
+
+                            {/* STOCK */}
+
+                            <div className="col-12 col-md-6 mb-3">
+
+                                <label className="form-label">
+                                    Stock
+                                </label>
+
+                                <input
+                                    type="number"
+                                    name="stock"
+                                    min="0"
+                                    step="1"
+                                    className="form-control"
+                                    value={
+                                        formulario.stock
+                                    }
+                                    onChange={
+                                        manejarCambio
+                                    }
+                                />
+
+                                <div className="form-text">
+                                    Puede ingresar 0 para marcar el producto como agotado.
+                                </div>
 
                             </div>
 
@@ -434,8 +602,12 @@ function AdminProductos() {
                                     type="text"
                                     name="imagen"
                                     className="form-control"
-                                    value={formulario.imagen}
-                                    onChange={manejarCambio}
+                                    value={
+                                        formulario.imagen
+                                    }
+                                    onChange={
+                                        manejarCambio
+                                    }
                                     placeholder="/img/producto.jpg"
                                 />
 
@@ -454,8 +626,12 @@ function AdminProductos() {
                                     name="descripcion"
                                     className="form-control"
                                     rows="3"
-                                    value={formulario.descripcion}
-                                    onChange={manejarCambio}
+                                    value={
+                                        formulario.descripcion
+                                    }
+                                    onChange={
+                                        manejarCambio
+                                    }
                                 />
 
                             </div>
@@ -472,8 +648,12 @@ function AdminProductos() {
                                         id="oferta"
                                         name="oferta"
                                         className="form-check-input"
-                                        checked={formulario.oferta}
-                                        onChange={manejarCambio}
+                                        checked={
+                                            formulario.oferta
+                                        }
+                                        onChange={
+                                            manejarCambio
+                                        }
                                     />
 
                                     <label
@@ -503,8 +683,12 @@ function AdminProductos() {
                                         name="precioOferta"
                                         min="1"
                                         className="form-control"
-                                        value={formulario.precioOferta}
-                                        onChange={manejarCambio}
+                                        value={
+                                            formulario.precioOferta
+                                        }
+                                        onChange={
+                                            manejarCambio
+                                        }
                                     />
 
                                 </div>
@@ -544,7 +728,9 @@ function AdminProductos() {
                             <button
                                 type="button"
                                 className="btn btn-secondary"
-                                onClick={limpiarFormulario}
+                                onClick={
+                                    limpiarFormulario
+                                }
                             >
                                 Cancelar
                             </button>
@@ -584,6 +770,10 @@ function AdminProductos() {
                             </th>
 
                             <th>
+                                Stock
+                            </th>
+
+                            <th>
                                 Oferta
                             </th>
 
@@ -598,86 +788,110 @@ function AdminProductos() {
 
                     <tbody>
 
-                        {productos.map(function(producto) {
+                        {productos.map(
+                            function(producto) {
 
-                            return (
-                                <tr key={producto.id}>
+                                return (
 
-                                    <td>
-                                        {producto.nombre}
-                                    </td>
+                                    <tr key={producto.id}>
 
-                                    <td>
-                                        {producto.categoria}
-                                    </td>
+                                        <td>
+                                            {producto.nombre}
+                                        </td>
 
-                                    <td>
-                                        $
-                                        {producto.precio.toLocaleString(
-                                            "es-CL"
-                                        )}
-                                    </td>
+                                        <td>
+                                            {producto.categoria}
+                                        </td>
 
-                                    <td>
-
-                                        {producto.oferta ? (
-
-                                            <span className="badge bg-success">
-
-                                                $
-                                                {producto.precioOferta.toLocaleString(
-                                                    "es-CL"
-                                                )}
-
-                                            </span>
-
-                                        ) : (
-
-                                            <span className="badge bg-secondary">
-                                                Sin oferta
-                                            </span>
-
-                                        )}
-
-                                    </td>
-
-                                    <td>
-
-                                        <button
-                                            type="button"
-                                            className="btn btn-warning btn-sm me-2"
-                                            onClick={function() {
-
-                                                cargarProductoParaEditar(
-                                                    producto
-                                                );
-
-                                            }}
-                                        >
-                                            Editar
-                                        </button>
+                                        <td>
+                                            $
+                                            {producto.precio.toLocaleString(
+                                                "es-CL"
+                                            )}
+                                        </td>
 
 
-                                        <button
-                                            type="button"
-                                            className="btn btn-danger btn-sm"
-                                            onClick={function() {
+                                        <td>
 
-                                                eliminarProducto(
-                                                    producto.id
-                                                );
+                                            {producto.stock > 0 ? (
 
-                                            }}
-                                        >
-                                            Eliminar
-                                        </button>
+                                                <span className="badge bg-success">
+                                                    {producto.stock} disponibles
+                                                </span>
 
-                                    </td>
+                                            ) : (
 
-                                </tr>
-                            );
+                                                <span className="badge bg-danger">
+                                                    Sin stock
+                                                </span>
 
-                        })}
+                                            )}
+
+                                        </td>
+
+
+                                        <td>
+
+                                            {producto.oferta ? (
+
+                                                <span className="badge bg-success">
+
+                                                    $
+                                                    {producto.precioOferta.toLocaleString(
+                                                        "es-CL"
+                                                    )}
+
+                                                </span>
+
+                                            ) : (
+
+                                                <span className="badge bg-secondary">
+                                                    Sin oferta
+                                                </span>
+
+                                            )}
+
+                                        </td>
+
+
+                                        <td>
+
+                                            <button
+                                                type="button"
+                                                className="btn btn-warning btn-sm me-2"
+                                                onClick={function() {
+
+                                                    cargarProductoParaEditar(
+                                                        producto
+                                                    );
+
+                                                }}
+                                            >
+                                                Editar
+                                            </button>
+
+
+                                            <button
+                                                type="button"
+                                                className="btn btn-danger btn-sm"
+                                                onClick={function() {
+
+                                                    eliminarProducto(
+                                                        producto.id
+                                                    );
+
+                                                }}
+                                            >
+                                                Eliminar
+                                            </button>
+
+                                        </td>
+
+                                    </tr>
+
+                                );
+                            }
+                        )}
 
                     </tbody>
 
@@ -688,5 +902,6 @@ function AdminProductos() {
         </main>
     );
 }
+
 
 export default AdminProductos;

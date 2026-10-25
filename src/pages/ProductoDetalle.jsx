@@ -1,17 +1,31 @@
 import React from "react";
-import { Link, useParams } from "react-router-dom";
 
-import { obtenerProductos } from "../services/productosService.js";
+import {
+    Link,
+    useParams
+} from "react-router-dom";
 
-function ProductoDetalle({ agregarAlCarrito }) {
+import {
+    obtenerProductos
+} from "../services/productosService.js";
+
+
+function ProductoDetalle({
+    agregarAlCarrito
+}) {
 
     const { id } = useParams();
 
-    const productos = obtenerProductos();
+    const productos =
+        obtenerProductos();
 
-    const producto = productos.find(function(item) {
-        return item.id === id;
-    });
+
+    const producto =
+        productos.find(function(item) {
+
+            return item.id === id;
+        });
+
 
     if (!producto) {
 
@@ -33,10 +47,18 @@ function ProductoDetalle({ agregarAlCarrito }) {
         );
     }
 
+
+    const stock =
+        producto.stock === undefined
+            ? 10
+            : Number(producto.stock);
+
+
     return (
         <main className="container py-5">
 
             <div className="row align-items-center">
+
 
                 <div className="col-12 col-md-6 mb-4">
 
@@ -52,49 +74,92 @@ function ProductoDetalle({ agregarAlCarrito }) {
 
                 </div>
 
+
                 <div className="col-12 col-md-6">
 
                     <p className="text-muted">
                         {producto.categoria}
                     </p>
 
+
                     <h1>
                         {producto.nombre}
                     </h1>
+
 
                     {producto.oferta ? (
 
                         <>
                             <p className="text-decoration-line-through text-muted">
-                                ${producto.precio.toLocaleString("es-CL")}
+                                $
+                                {producto.precio.toLocaleString(
+                                    "es-CL"
+                                )}
                             </p>
 
                             <p className="fs-3 fw-bold text-danger">
-                                ${producto.precioOferta.toLocaleString("es-CL")}
+                                $
+                                {producto.precioOferta.toLocaleString(
+                                    "es-CL"
+                                )}
                             </p>
                         </>
 
                     ) : (
 
                         <p className="fs-3 fw-bold">
-                            ${producto.precio.toLocaleString("es-CL")}
+                            $
+                            {producto.precio.toLocaleString(
+                                "es-CL"
+                            )}
                         </p>
 
                     )}
+
 
                     <p>
                         {producto.descripcion}
                     </p>
 
+
+                    {stock > 0 ? (
+
+                        <div className="alert alert-success">
+                            Stock disponible: {stock}
+                        </div>
+
+                    ) : (
+
+                        <div className="alert alert-danger">
+                            Producto sin stock.
+                        </div>
+
+                    )}
+
+
                     <button
                         type="button"
-                        className="btn btn-primary me-2"
+                        className={
+                            stock > 0
+                                ? "btn btn-primary me-2"
+                                : "btn btn-secondary me-2"
+                        }
+                        disabled={stock <= 0}
                         onClick={function() {
-                            agregarAlCarrito(producto);
+
+                            agregarAlCarrito(
+                                producto
+                            );
+
                         }}
                     >
-                        Agregar al carrito
+
+                        {stock > 0
+                            ? "Agregar al carrito"
+                            : "Sin stock"}
+
                     </button>
+
 
                     <Link
                         to="/productos"
@@ -110,5 +175,6 @@ function ProductoDetalle({ agregarAlCarrito }) {
         </main>
     );
 }
+
 
 export default ProductoDetalle;

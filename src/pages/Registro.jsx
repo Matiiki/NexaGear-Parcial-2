@@ -8,29 +8,102 @@ import {
 
 function Registro() {
 
-    const [formulario, setFormulario] = useState({
-        nombre: "",
-        apellido: "",
-        correo: "",
-        contrasena: "",
-        confirmarContrasena: "",
-        fechaNacimiento: ""
-    });
+    const [formulario, setFormulario] =
+        useState({
+
+            nombre: "",
+            apellido: "",
+            correo: "",
+            contrasena: "",
+            confirmarContrasena: "",
+            fechaNacimiento: ""
+        });
 
 
-    const [errores, setErrores] = useState({});
+    const [errores, setErrores] =
+        useState({});
 
-    const [mensajeExito, setMensajeExito] = useState("");
+
+    const [mensajeExito, setMensajeExito] =
+        useState("");
+
+
+    function soloLetras(valor) {
+
+        return valor.replace(
+            /[^a-zA-ZÁÉÍÓÚáéíóúÑñÜü\s'-]/g,
+            ""
+        );
+    }
 
 
     function manejarCambio(evento) {
 
-        const { name, value } = evento.target;
+        const {
+            name,
+            value
+        } = evento.target;
+
 
         setFormulario({
             ...formulario,
             [name]: value
         });
+
+
+        setErrores({
+            ...errores,
+            [name]: ""
+        });
+
+
+        setMensajeExito("");
+    }
+
+
+    function manejarNombre(evento) {
+
+        const valor =
+            soloLetras(
+                evento.target.value
+            );
+
+
+        setFormulario({
+            ...formulario,
+            nombre: valor
+        });
+
+
+        setErrores({
+            ...errores,
+            nombre: ""
+        });
+
+
+        setMensajeExito("");
+    }
+
+
+    function manejarApellido(evento) {
+
+        const valor =
+            soloLetras(
+                evento.target.value
+            );
+
+
+        setFormulario({
+            ...formulario,
+            apellido: valor
+        });
+
+
+        setErrores({
+            ...errores,
+            apellido: ""
+        });
+
 
         setMensajeExito("");
     }
@@ -40,13 +113,25 @@ function Registro() {
 
         const nuevosErrores = {};
 
+        const regexNombre =
+            /^[a-zA-ZÁÉÍÓÚáéíóúÑñÜü\s'-]{2,}$/;
 
-        // NOMBRE
 
-        if (formulario.nombre.trim() === "") {
+        if (
+            formulario.nombre.trim() === ""
+        ) {
 
             nuevosErrores.nombre =
-                "El nombre es obligatorio.";
+                "Ingrese su nombre.";
+
+        } else if (
+            !regexNombre.test(
+                formulario.nombre.trim()
+            )
+        ) {
+
+            nuevosErrores.nombre =
+                "El nombre solo puede contener letras.";
 
         } else if (
             formulario.nombre.trim().length < 2
@@ -57,12 +142,21 @@ function Registro() {
         }
 
 
-        // APELLIDO
-
-        if (formulario.apellido.trim() === "") {
+        if (
+            formulario.apellido.trim() === ""
+        ) {
 
             nuevosErrores.apellido =
-                "El apellido es obligatorio.";
+                "Ingrese su apellido.";
+
+        } else if (
+            !regexNombre.test(
+                formulario.apellido.trim()
+            )
+        ) {
+
+            nuevosErrores.apellido =
+                "El apellido solo puede contener letras.";
 
         } else if (
             formulario.apellido.trim().length < 2
@@ -73,15 +167,17 @@ function Registro() {
         }
 
 
-        // CORREO
-
-        if (formulario.correo.trim() === "") {
+        if (
+            formulario.correo.trim() === ""
+        ) {
 
             nuevosErrores.correo =
-                "El correo electrónico es obligatorio.";
+                "Ingrese su correo electrónico.";
 
         } else if (
-            !correoEsValido(formulario.correo)
+            !correoEsValido(
+                formulario.correo
+            )
         ) {
 
             nuevosErrores.correo =
@@ -89,12 +185,12 @@ function Registro() {
         }
 
 
-        // CONTRASEÑA
-
-        if (formulario.contrasena === "") {
+        if (
+            formulario.contrasena === ""
+        ) {
 
             nuevosErrores.contrasena =
-                "La contraseña es obligatoria.";
+                "Ingrese una contraseña.";
 
         } else if (
             formulario.contrasena.length < 8
@@ -105,14 +201,12 @@ function Registro() {
         }
 
 
-        // CONFIRMAR CONTRASEÑA
-
         if (
             formulario.confirmarContrasena === ""
         ) {
 
             nuevosErrores.confirmarContrasena =
-                "Debe confirmar la contraseña.";
+                "Confirme su contraseña.";
 
         } else if (
             !contrasenasCoinciden(
@@ -126,14 +220,12 @@ function Registro() {
         }
 
 
-        // FECHA DE NACIMIENTO
-
         if (
             formulario.fechaNacimiento === ""
         ) {
 
             nuevosErrores.fechaNacimiento =
-                "La fecha de nacimiento es obligatoria.";
+                "Ingrese su fecha de nacimiento.";
 
         } else {
 
@@ -143,12 +235,14 @@ function Registro() {
                     "T00:00:00"
                 );
 
+
             const fechaActual =
                 new Date();
 
 
             if (
-                fechaIngresada > fechaActual
+                fechaIngresada >
+                fechaActual
             ) {
 
                 nuevosErrores.fechaNacimiento =
@@ -157,11 +251,15 @@ function Registro() {
         }
 
 
-        setErrores(nuevosErrores);
+        setErrores(
+            nuevosErrores
+        );
 
 
         return (
-            Object.keys(nuevosErrores).length === 0
+            Object.keys(
+                nuevosErrores
+            ).length === 0
         );
     }
 
@@ -173,14 +271,13 @@ function Registro() {
         setMensajeExito("");
 
 
-        // PRIMERO VALIDAMOS
+        if (
+            !validarFormulario()
+        ) {
 
-        if (!validarFormulario()) {
             return;
         }
 
-
-        // LEER USUARIOS GUARDADOS
 
         const usuariosGuardados =
             localStorage.getItem(
@@ -196,8 +293,6 @@ function Registro() {
                 : [];
 
 
-        // COMPROBAR CORREO DUPLICADO
-
         const correoNormalizado =
             formulario.correo
                 .trim()
@@ -205,33 +300,35 @@ function Registro() {
 
 
         const correoExiste =
-            usuarios.some(function(usuario) {
+            usuarios.some(
+                function(usuario) {
 
-                return (
-                    usuario.correo
-                        .trim()
-                        .toLowerCase() ===
-                    correoNormalizado
-                );
-            });
+                    return (
+                        usuario.correo &&
+                        usuario.correo
+                            .trim()
+                            .toLowerCase() ===
+                        correoNormalizado
+                    );
+                }
+            );
 
 
         if (correoExiste) {
 
             setErrores({
                 correo:
-                    "Ya existe una cuenta registrada con este correo electrónico."
+                    "Este correo ya está registrado."
             });
 
             return;
         }
 
 
-        // CREAR USUARIO
-
         const nuevoUsuario = {
 
-            id: Date.now(),
+            id:
+                Date.now(),
 
             nombre:
                 formulario.nombre.trim(),
@@ -247,35 +344,25 @@ function Registro() {
         };
 
 
-        // GUARDAR USUARIO
-
-        const usuariosActualizados = [
-            ...usuarios,
-            nuevoUsuario
-        ];
-
-
         localStorage.setItem(
             "usuariosAdmin",
-            JSON.stringify(
-                usuariosActualizados
-            )
+            JSON.stringify([
+                ...usuarios,
+                nuevoUsuario
+            ])
         );
 
 
-        // MENSAJE DE ÉXITO
-
         setMensajeExito(
-            "Cuenta creada correctamente."
+            "Usuario registrado correctamente."
         );
 
 
         setErrores({});
 
 
-        // LIMPIAR FORMULARIO
-
         setFormulario({
+
             nombre: "",
             apellido: "",
             correo: "",
@@ -287,6 +374,7 @@ function Registro() {
 
 
     return (
+
         <main className="container py-5">
 
             <div className="row justify-content-center">
@@ -297,50 +385,51 @@ function Registro() {
 
                         <div className="card-body p-4">
 
-                            <h1 className="text-center mb-3">
-                                Crear cuenta
+                            <h1 className="text-center mb-4">
+                                Registro
                             </h1>
 
 
-                            <p className="text-center text-muted mb-4">
-                                Regístrate en NexaGear para acceder
-                                a nuestros productos.
-                            </p>
+                            {mensajeExito && (
+
+                                <div className="alert alert-success">
+                                    {mensajeExito}
+                                </div>
+
+                            )}
 
 
                             <form
-                                onSubmit={manejarEnvio}
+                                onSubmit={
+                                    manejarEnvio
+                                }
                                 noValidate
                             >
 
 
-                                {/* NOMBRE */}
-
                                 <div className="mb-3">
 
-                                    <label
-                                        htmlFor="nombre"
-                                        className="form-label"
-                                    >
+                                    <label className="form-label">
                                         Nombre
                                     </label>
 
                                     <input
                                         type="text"
-                                        id="nombre"
                                         name="nombre"
                                         className={
-                                            errores.nombre
-                                                ? "form-control is-invalid"
-                                                : "form-control"
+                                            "form-control " +
+                                            (
+                                                errores.nombre
+                                                    ? "is-invalid"
+                                                    : ""
+                                            )
                                         }
                                         value={
                                             formulario.nombre
                                         }
                                         onChange={
-                                            manejarCambio
+                                            manejarNombre
                                         }
-                                        placeholder="Ej: Matias"
                                     />
 
                                     {errores.nombre && (
@@ -354,33 +443,29 @@ function Registro() {
                                 </div>
 
 
-                                {/* APELLIDO */}
-
                                 <div className="mb-3">
 
-                                    <label
-                                        htmlFor="apellido"
-                                        className="form-label"
-                                    >
+                                    <label className="form-label">
                                         Apellido
                                     </label>
 
                                     <input
                                         type="text"
-                                        id="apellido"
                                         name="apellido"
                                         className={
-                                            errores.apellido
-                                                ? "form-control is-invalid"
-                                                : "form-control"
+                                            "form-control " +
+                                            (
+                                                errores.apellido
+                                                    ? "is-invalid"
+                                                    : ""
+                                            )
                                         }
                                         value={
                                             formulario.apellido
                                         }
                                         onChange={
-                                            manejarCambio
+                                            manejarApellido
                                         }
-                                        placeholder="Ej: Acevedo"
                                     />
 
                                     {errores.apellido && (
@@ -394,25 +479,22 @@ function Registro() {
                                 </div>
 
 
-                                {/* CORREO */}
-
                                 <div className="mb-3">
 
-                                    <label
-                                        htmlFor="correo"
-                                        className="form-label"
-                                    >
+                                    <label className="form-label">
                                         Correo electrónico
                                     </label>
 
                                     <input
                                         type="email"
-                                        id="correo"
                                         name="correo"
                                         className={
-                                            errores.correo
-                                                ? "form-control is-invalid"
-                                                : "form-control"
+                                            "form-control " +
+                                            (
+                                                errores.correo
+                                                    ? "is-invalid"
+                                                    : ""
+                                            )
                                         }
                                         value={
                                             formulario.correo
@@ -420,7 +502,6 @@ function Registro() {
                                         onChange={
                                             manejarCambio
                                         }
-                                        placeholder="Ej: usuario@gmail.com"
                                     />
 
                                     {errores.correo && (
@@ -434,25 +515,22 @@ function Registro() {
                                 </div>
 
 
-                                {/* CONTRASEÑA */}
-
                                 <div className="mb-3">
 
-                                    <label
-                                        htmlFor="contrasena"
-                                        className="form-label"
-                                    >
+                                    <label className="form-label">
                                         Contraseña
                                     </label>
 
                                     <input
                                         type="password"
-                                        id="contrasena"
                                         name="contrasena"
                                         className={
-                                            errores.contrasena
-                                                ? "form-control is-invalid"
-                                                : "form-control"
+                                            "form-control " +
+                                            (
+                                                errores.contrasena
+                                                    ? "is-invalid"
+                                                    : ""
+                                            )
                                         }
                                         value={
                                             formulario.contrasena
@@ -460,7 +538,6 @@ function Registro() {
                                         onChange={
                                             manejarCambio
                                         }
-                                        placeholder="Mínimo 8 caracteres"
                                     />
 
                                     {errores.contrasena && (
@@ -474,25 +551,22 @@ function Registro() {
                                 </div>
 
 
-                                {/* CONFIRMAR CONTRASEÑA */}
-
                                 <div className="mb-3">
 
-                                    <label
-                                        htmlFor="confirmarContrasena"
-                                        className="form-label"
-                                    >
+                                    <label className="form-label">
                                         Confirmar contraseña
                                     </label>
 
                                     <input
                                         type="password"
-                                        id="confirmarContrasena"
                                         name="confirmarContrasena"
                                         className={
-                                            errores.confirmarContrasena
-                                                ? "form-control is-invalid"
-                                                : "form-control"
+                                            "form-control " +
+                                            (
+                                                errores.confirmarContrasena
+                                                    ? "is-invalid"
+                                                    : ""
+                                            )
                                         }
                                         value={
                                             formulario.confirmarContrasena
@@ -500,15 +574,12 @@ function Registro() {
                                         onChange={
                                             manejarCambio
                                         }
-                                        placeholder="Repite tu contraseña"
                                     />
 
                                     {errores.confirmarContrasena && (
 
                                         <div className="invalid-feedback">
-                                            {
-                                                errores.confirmarContrasena
-                                            }
+                                            {errores.confirmarContrasena}
                                         </div>
 
                                     )}
@@ -516,25 +587,22 @@ function Registro() {
                                 </div>
 
 
-                                {/* FECHA */}
-
                                 <div className="mb-3">
 
-                                    <label
-                                        htmlFor="fechaNacimiento"
-                                        className="form-label"
-                                    >
+                                    <label className="form-label">
                                         Fecha de nacimiento
                                     </label>
 
                                     <input
                                         type="date"
-                                        id="fechaNacimiento"
                                         name="fechaNacimiento"
                                         className={
-                                            errores.fechaNacimiento
-                                                ? "form-control is-invalid"
-                                                : "form-control"
+                                            "form-control " +
+                                            (
+                                                errores.fechaNacimiento
+                                                    ? "is-invalid"
+                                                    : ""
+                                            )
                                         }
                                         value={
                                             formulario.fechaNacimiento
@@ -547,9 +615,7 @@ function Registro() {
                                     {errores.fechaNacimiento && (
 
                                         <div className="invalid-feedback">
-                                            {
-                                                errores.fechaNacimiento
-                                            }
+                                            {errores.fechaNacimiento}
                                         </div>
 
                                     )}
@@ -561,19 +627,8 @@ function Registro() {
                                     type="submit"
                                     className="btn btn-primary w-100"
                                 >
-                                    Crear cuenta
+                                    Registrarse
                                 </button>
-
-
-                                {mensajeExito && (
-
-                                    <div className="alert alert-success mt-3 text-center">
-
-                                        {mensajeExito}
-
-                                    </div>
-
-                                )}
 
                             </form>
 
@@ -588,5 +643,6 @@ function Registro() {
         </main>
     );
 }
+
 
 export default Registro;

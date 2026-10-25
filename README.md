@@ -321,3 +321,7 @@ npm install
 ## Proyecto académico
 
 Proyecto desarrollado para la **Evaluación Parcial 2 de Desarrollo Fullstack II**.
+
+## Integrantes 
+-Matias Acevedo
+-Felipe Marchant 

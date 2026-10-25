@@ -1,19 +1,37 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 
-function Checkout({ carrito }) {
+function Checkout({ carrito, setCarrito }) {
 
     const history = useHistory();
 
-    const [datos, setDatos] = useState({
-        nombre: "",
-        direccion: "",
-        comuna: "",
-        telefono: "",
-        entrega: ""
+    const [datos, setDatos] = useState(function() {
+
+        const sesionGuardada =
+            localStorage.getItem("sesionUsuario");
+
+        const usuario =
+            sesionGuardada
+                ? JSON.parse(sesionGuardada)
+                : null;
+
+        return {
+            nombre: usuario
+                ? usuario.nombre + " " + usuario.apellido
+                : "",
+
+            correo: usuario
+                ? usuario.correo
+                : "",
+
+            direccion: "",
+            comuna: "",
+            telefono: "",
+            entrega: ""
+        };
     });
 
-    const [error, setError] = useState("");
+    const [errores, setErrores] = useState({});
 
 
     function manejarCambio(evento) {
@@ -24,6 +42,92 @@ function Checkout({ carrito }) {
             ...datos,
             [name]: value
         });
+
+        setErrores({
+            ...errores,
+            [name]: ""
+        });
+    }
+
+
+    function manejarTelefono(evento) {
+
+        const soloNumeros =
+            evento.target.value.replace(/\D/g, "");
+
+        setDatos({
+            ...datos,
+            telefono: soloNumeros
+        });
+
+        setErrores({
+            ...errores,
+            telefono: ""
+        });
+    }
+
+
+    function validarFormulario() {
+
+        const nuevosErrores = {};
+
+        if (datos.nombre.trim() === "") {
+            nuevosErrores.nombre =
+                "Ingrese su nombre completo.";
+        }
+
+
+        if (datos.correo.trim() === "") {
+
+            nuevosErrores.correo =
+                "Ingrese su correo electrónico.";
+
+        } else {
+
+            const regexCorreo =
+                /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (!regexCorreo.test(datos.correo)) {
+
+                nuevosErrores.correo =
+                    "Ingrese un correo electrónico válido.";
+            }
+        }
+
+
+        if (datos.direccion.trim() === "") {
+            nuevosErrores.direccion =
+                "Ingrese su dirección.";
+        }
+
+
+        if (datos.comuna.trim() === "") {
+            nuevosErrores.comuna =
+                "Ingrese su comuna.";
+        }
+
+
+        if (datos.telefono.trim() === "") {
+
+            nuevosErrores.telefono =
+                "Ingrese su teléfono.";
+
+        } else if (!/^[0-9]{9}$/.test(datos.telefono)) {
+
+            nuevosErrores.telefono =
+                "El teléfono debe contener exactamente 9 números.";
+        }
+
+
+        if (datos.entrega === "") {
+            nuevosErrores.entrega =
+                "Seleccione un tipo de entrega.";
+        }
+
+
+        setErrores(nuevosErrores);
+
+        return Object.keys(nuevosErrores).length === 0;
     }
 
 
@@ -31,108 +135,87 @@ function Checkout({ carrito }) {
 
         evento.preventDefault();
 
-        setError("");
-
-
-        if (
-            datos.nombre.trim() === "" ||
-            datos.direccion.trim() === "" ||
-            datos.comuna.trim() === "" ||
-            datos.telefono.trim() === "" ||
-            datos.entrega === ""
-        ) {
-
-            setError(
-                "Debe completar todos los datos de envío."
-            );
-
+        if (!validarFormulario()) {
             return;
         }
 
 
-        const pagoExitoso = true;
+        const totalPedido =
+            carrito.reduce(function(acumulado, producto) {
+
+                return (
+                    acumulado +
+                    producto.precio *
+                    producto.cantidad
+                );
+
+            }, 0);
 
 
-        if (pagoExitoso) {
+        const nuevoPedido = {
 
-            const pedidosGuardados =
-                localStorage.getItem("pedidosAdmin");
+            id: Date.now(),
 
-            const pedidos =
-                pedidosGuardados
-                    ? JSON.parse(pedidosGuardados)
-                    : [];
+            cliente:
+                datos.nombre.trim(),
 
+            correo:
+                datos.correo.trim(),
 
-            const totalPedido =
-                carrito.reduce(function(acumulado, producto) {
+            direccion:
+                datos.direccion.trim(),
 
-                    return acumulado +
-                        producto.precio *
-                        producto.cantidad;
+            comuna:
+                datos.comuna.trim(),
 
-                }, 0);
+            telefono:
+                datos.telefono.trim(),
 
+            entrega:
+                datos.entrega,
 
-            const nuevoPedido = {
+            productos:
+                carrito,
 
-                id: Date.now(),
+            total:
+                totalPedido,
 
-                cliente:
-                    datos.nombre.trim(),
+            fecha:
+                new Date().toLocaleString("es-CL"),
 
-                direccion:
-                    datos.direccion.trim(),
-
-                comuna:
-                    datos.comuna.trim(),
-
-                telefono:
-                    datos.telefono.trim(),
-
-                entrega:
-                    datos.entrega,
-
-                productos:
-                    carrito,
-
-                total:
-                    totalPedido,
-
-                fecha:
-                    new Date().toLocaleString(
-                        "es-CL"
-                    ),
-
-                estado:
-                    "Pendiente"
-            };
+            estado:
+                "Pendiente"
+        };
 
 
-            const pedidosActualizados = [
+        const pedidosGuardados =
+            localStorage.getItem("pedidosAdmin");
+
+
+        const pedidos =
+            pedidosGuardados
+                ? JSON.parse(pedidosGuardados)
+                : [];
+
+
+        localStorage.setItem(
+            "pedidosAdmin",
+            JSON.stringify([
                 ...pedidos,
                 nuevoPedido
-            ];
+            ])
+        );
 
 
-            localStorage.setItem(
-                "pedidosAdmin",
-                JSON.stringify(
-                    pedidosActualizados
-                )
-            );
+        localStorage.setItem(
+            "ultimoPedido",
+            JSON.stringify(nuevoPedido)
+        );
 
 
-            history.push(
-                "/compra-exitosa"
-            );
+        setCarrito([]);
 
-        } else {
-
-            history.push(
-                "/pago-error"
-            );
-        }
+        history.push("/compra-exitosa");
     }
 
 
@@ -162,7 +245,12 @@ function Checkout({ carrito }) {
                     </h1>
 
 
-                    <form onSubmit={finalizarCompra}>
+                    <form
+                        onSubmit={finalizarCompra}
+                        noValidate
+                    >
+
+                        {/* NOMBRE */}
 
                         <div className="mb-3">
 
@@ -173,13 +261,60 @@ function Checkout({ carrito }) {
                             <input
                                 type="text"
                                 name="nombre"
-                                className="form-control"
+                                className={
+                                    "form-control " +
+                                    (errores.nombre
+                                        ? "is-invalid"
+                                        : "")
+                                }
                                 value={datos.nombre}
                                 onChange={manejarCambio}
                             />
 
+                            {errores.nombre && (
+
+                                <div className="invalid-feedback">
+                                    {errores.nombre}
+                                </div>
+
+                            )}
+
                         </div>
 
+
+                        {/* CORREO */}
+
+                        <div className="mb-3">
+
+                            <label className="form-label">
+                                Correo electrónico
+                            </label>
+
+                            <input
+                                type="email"
+                                name="correo"
+                                className={
+                                    "form-control " +
+                                    (errores.correo
+                                        ? "is-invalid"
+                                        : "")
+                                }
+                                value={datos.correo}
+                                onChange={manejarCambio}
+                            />
+
+                            {errores.correo && (
+
+                                <div className="invalid-feedback">
+                                    {errores.correo}
+                                </div>
+
+                            )}
+
+                        </div>
+
+
+                        {/* DIRECCIÓN */}
 
                         <div className="mb-3">
 
@@ -190,13 +325,28 @@ function Checkout({ carrito }) {
                             <input
                                 type="text"
                                 name="direccion"
-                                className="form-control"
+                                className={
+                                    "form-control " +
+                                    (errores.direccion
+                                        ? "is-invalid"
+                                        : "")
+                                }
                                 value={datos.direccion}
                                 onChange={manejarCambio}
                             />
 
+                            {errores.direccion && (
+
+                                <div className="invalid-feedback">
+                                    {errores.direccion}
+                                </div>
+
+                            )}
+
                         </div>
 
+
+                        {/* COMUNA */}
 
                         <div className="mb-3">
 
@@ -207,13 +357,28 @@ function Checkout({ carrito }) {
                             <input
                                 type="text"
                                 name="comuna"
-                                className="form-control"
+                                className={
+                                    "form-control " +
+                                    (errores.comuna
+                                        ? "is-invalid"
+                                        : "")
+                                }
                                 value={datos.comuna}
                                 onChange={manejarCambio}
                             />
 
+                            {errores.comuna && (
+
+                                <div className="invalid-feedback">
+                                    {errores.comuna}
+                                </div>
+
+                            )}
+
                         </div>
 
+
+                        {/* TELÉFONO */}
 
                         <div className="mb-3">
 
@@ -224,13 +389,31 @@ function Checkout({ carrito }) {
                             <input
                                 type="text"
                                 name="telefono"
-                                className="form-control"
+                                className={
+                                    "form-control " +
+                                    (errores.telefono
+                                        ? "is-invalid"
+                                        : "")
+                                }
                                 value={datos.telefono}
-                                onChange={manejarCambio}
+                                maxLength="9"
+                                inputMode="numeric"
+                                placeholder="912345678"
+                                onChange={manejarTelefono}
                             />
+
+                            {errores.telefono && (
+
+                                <div className="invalid-feedback">
+                                    {errores.telefono}
+                                </div>
+
+                            )}
 
                         </div>
 
+
+                        {/* ENTREGA */}
 
                         <div className="mb-3">
 
@@ -240,7 +423,12 @@ function Checkout({ carrito }) {
 
                             <select
                                 name="entrega"
-                                className="form-select"
+                                className={
+                                    "form-select " +
+                                    (errores.entrega
+                                        ? "is-invalid"
+                                        : "")
+                                }
                                 value={datos.entrega}
                                 onChange={manejarCambio}
                             >
@@ -259,16 +447,15 @@ function Checkout({ carrito }) {
 
                             </select>
 
+                            {errores.entrega && (
+
+                                <div className="invalid-feedback">
+                                    {errores.entrega}
+                                </div>
+
+                            )}
+
                         </div>
-
-
-                        {error && (
-
-                            <div className="alert alert-danger">
-                                {error}
-                            </div>
-
-                        )}
 
 
                         <button

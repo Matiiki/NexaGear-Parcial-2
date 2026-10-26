@@ -2,7 +2,9 @@
 
 NexaGear es una tienda online desarrollada con React para la asignatura **Desarrollo Fullstack II**.
 
-El proyecto corresponde a la continuación de la Evaluación Parcial 1, migrando el sitio original desarrollado con HTML, CSS y JavaScript hacia una aplicación basada en componentes React.
+El proyecto corresponde a la continuación de la Evaluación Parcial 1, migrando y ampliando el sitio original desarrollado con HTML, CSS y JavaScript hacia una aplicación frontend basada en componentes React.
+
+---
 
 ## Tecnologías utilizadas
 
@@ -11,11 +13,15 @@ El proyecto corresponde a la continuación de la Evaluación Parcial 1, migrando
 - JavaScript
 - Bootstrap 5
 - Vite
+- Vitest 0.34.6
 - LocalStorage
-- Jasmine
-- Karma
+- Git
+- GitHub
+- GitHub Pages
 
-## Funcionalidades principales
+---
+
+# Funcionalidades principales
 
 El proyecto incluye:
 
@@ -25,13 +31,21 @@ El proyecto incluye:
 - Categorías.
 - Productos en oferta.
 - Carrito de compras.
-- Control de cantidades.
+- Aumento y disminución de cantidades.
+- Eliminación de productos del carrito.
+- Cálculo automático de subtotales y total.
 - Control de stock.
+- Bloqueo de productos sin stock.
+- Límite de compra según stock disponible.
+- Descuento automático de stock después de una compra.
 - Registro de usuarios.
 - Inicio y cierre de sesión.
 - Formulario de contacto.
 - Checkout.
-- Validaciones de formularios.
+- Validación de datos del checkout.
+- Validación de correo electrónico.
+- Validación de teléfono.
+- Validación de nombres y comuna.
 - Registro de pedidos.
 - Compra exitosa.
 - Panel de administración.
@@ -39,15 +53,15 @@ El proyecto incluye:
 - Administración de categorías.
 - Administración de usuarios.
 - Administración de pedidos.
-- Reportes.
+- Reportes administrativos.
 - Persistencia mediante LocalStorage.
-- Pruebas unitarias con Jasmine y Karma.
+- Pruebas unitarias con Vitest.
 
 ---
 
 # Rutas principales
 
-La aplicación utiliza `HashRouter`, por lo que las rutas se muestran con `#` en la URL.
+La aplicación utiliza `HashRouter`, por lo que las rutas se muestran utilizando `#` en la URL.
 
 | Ruta | Página | Descripción |
 |---|---|---|
@@ -56,13 +70,20 @@ La aplicación utiliza `HashRouter`, por lo que las rutas se muestran con `#` en
 | `/#/producto/:id` | ProductoDetalle | Detalle de un producto |
 | `/#/categorias` | Categorías | Productos filtrados por categoría |
 | `/#/ofertas` | Ofertas | Productos con descuento |
-| `/#/carrito` | Carrito | Productos agregados y total |
+| `/#/carrito` | Carrito | Productos agregados, cantidades y total |
 | `/#/checkout` | Checkout | Datos de envío y confirmación de compra |
 | `/#/compra-exitosa` | CompraExitosa | Confirmación del pedido |
+| `/#/pago-error` | PagoError | Vista de error de pago |
 | `/#/login` | Login | Inicio de sesión |
 | `/#/registro` | Registro | Creación de cuenta |
 | `/#/contacto` | Contacto | Formulario de contacto |
 | `/#/admin` | AdminDashboard | Panel de administración |
+| `/#/admin/productos` | AdminProductos | Gestión de productos y stock |
+| `/#/admin/categorias` | AdminCategorias | Gestión de categorías |
+| `/#/admin/usuarios` | AdminUsuarios | Gestión de usuarios |
+| `/#/admin/pedidos` | AdminPedidos | Gestión de pedidos |
+| `/#/admin/reportes` | AdminReportes | Reportes administrativos |
+| `/#/admin/perfil` | AdminPerfil | Perfil administrativo |
 
 ---
 
@@ -75,18 +96,20 @@ Se debe tener instalado:
 - Node.js
 - npm
 
-El proyecto fue desarrollado utilizando una versión compatible con:
+El proyecto fue preparado para funcionar en el entorno utilizado durante el desarrollo de la asignatura.
+
+Para verificar las versiones instaladas:
 
 ```bash
-node v14.x
-npm 6.x
+node -v
+npm -v
 ```
 
-También fue probado con Node.js 22 y npm 10 sin necesidad de modificar el código.
+---
 
 ## 2. Instalar dependencias
 
-Después de descargar o clonar el proyecto, abrir una terminal dentro de la carpeta del proyecto.
+Después de descargar o clonar el proyecto, abrir una terminal dentro de la carpeta principal.
 
 Ejecutar:
 
@@ -94,15 +117,13 @@ Ejecutar:
 npm install
 ```
 
-Este comando instalará todas las dependencias especificadas en `package.json`.
-
-> **Nota para Windows:** si usas PowerShell y el comando `npm` está bloqueado por la política de ejecución de scripts, utiliza `npm.cmd` (por ejemplo, `npm.cmd install` o `npm.cmd run dev`).
+Este comando instalará todas las dependencias definidas en `package.json`.
 
 ---
 
 # Iniciar la página
 
-Para iniciar NexaGear ejecutar:
+Para iniciar NexaGear en modo desarrollo ejecutar:
 
 ```bash
 npm run dev
@@ -124,7 +145,7 @@ Ejemplo:
 http://localhost:3000/
 ```
 
-Para detener el servidor presionar:
+Para detener el servidor:
 
 ```text
 Ctrl + C
@@ -132,48 +153,237 @@ Ctrl + C
 
 ---
 
+# Generar versión de producción
+
+Para generar la versión optimizada de producción:
+
+```bash
+npm run build
+```
+
+Vite generará la carpeta:
+
+```text
+dist/
+```
+
+Esta carpeta contiene la versión compilada de la aplicación.
+
+---
+
+# GitHub Pages
+
+El proyecto está preparado para ser publicado mediante GitHub Pages utilizando GitHub Actions.
+
+Repositorio:
+
+```text
+https://github.com/Matiiki/NexaGear-Parcial-2
+```
+
+Dirección de publicación:
+
+```text
+https://matiiki.github.io/NexaGear-Parcial-2/
+```
+
+Al estar publicado en GitHub Pages no es necesario ejecutar `npm run dev` para visualizar la aplicación.
+
+La configuración de Vite utiliza como ruta base:
+
+```text
+/NexaGear-Parcial-2/
+```
+
+La aplicación utiliza `HashRouter`, lo que permite mantener correctamente las rutas al utilizar GitHub Pages.
+
+---
+
 # Ejecutar los tests
 
-El proyecto utiliza:
+El proyecto utiliza **Vitest** para desarrollar y ejecutar las pruebas unitarias.
 
-- Jasmine para escribir las pruebas unitarias.
-- Karma para ejecutar las pruebas.
+Actualmente existen:
+
+```text
+28 pruebas unitarias
+```
+
+distribuidas en 3 archivos de prueba.
 
 Para ejecutar todas las pruebas:
+
+```bash
+npx vitest run
+```
+
+También puede utilizarse:
 
 ```bash
 npm test
 ```
 
-Si todas las pruebas funcionan correctamente, la terminal mostrará un resultado similar a:
+si el script se encuentra configurado en `package.json`.
+
+El resultado correcto es similar a:
 
 ```text
-TOTAL: 28 SUCCESS
+Test Files  3 passed (3)
+Tests       28 passed (28)
 ```
 
-Esto significa que las 28 pruebas fueron ejecutadas correctamente.
+Esto significa que las 28 pruebas finalizaron correctamente.
 
 ---
 
-# Ejemplo de un test exitoso
+# Archivos de testing
 
-Un test puede comprobar el cálculo del subtotal de un producto:
+Las pruebas se encuentran en:
+
+```text
+src/tests/
+```
+
+Actualmente se utilizan:
+
+| Archivo | Pruebas | Contenido |
+|---|---:|---|
+| `carrito.spec.js` | 4 | Subtotal, total, aumento y eliminación |
+| `productosRegistro.spec.js` | 6 | Ofertas, precios, correo y contraseñas |
+| `casosPosibles.spec.js` | 18 | Casos límite de carrito, productos y validaciones |
+
+Total:
+
+```text
+28 pruebas
+```
+
+---
+
+# Funciones probadas
+
+La lógica principal utilizada por las pruebas se encuentra en:
+
+```text
+src/utils/logicaNexaGear.js
+```
+
+Entre las funciones probadas se encuentran:
 
 ```javascript
-expect(
-    calcularSubtotal(29990, 2)
-).toBe(59980);
+calcularSubtotal()
+calcularTotal()
+aumentarCantidad()
+eliminarProducto()
+obtenerPrecioFinal()
+filtrarOfertas()
+correoEsValido()
+contrasenasCoinciden()
 ```
-
-Si la función devuelve `59980`, la prueba será exitosa.
 
 ---
 
-# Ejemplo para demostrar un test fallido
+# Casos cubiertos por los tests
 
-Para demostrar el funcionamiento de las pruebas durante la presentación se puede modificar temporalmente el resultado esperado.
+## Carrito
 
-Ejemplo correcto:
+Las pruebas verifican:
+
+- Cálculo correcto del subtotal.
+- Cálculo correcto del total.
+- Aumento de cantidad.
+- Eliminación de productos.
+- Intento de aumentar un producto inexistente.
+- Eliminación de un producto inexistente.
+- Carrito vacío.
+- Cantidad igual a cero.
+- Inmutabilidad del arreglo original.
+
+## Productos y ofertas
+
+Las pruebas verifican:
+
+- Precio normal.
+- Precio de oferta.
+- Filtrado de productos en oferta.
+- Producto sin propiedad de oferta.
+- Precio de oferta igual a cero.
+- Oferta sin precio de oferta.
+- Lista de productos vacía.
+- Lista sin productos en oferta.
+
+## Correos electrónicos
+
+Las pruebas verifican:
+
+- Correo válido.
+- Correo inválido.
+- Correo con mayúsculas.
+- Espacios adicionales.
+- Dos puntos seguidos.
+- Dos arrobas.
+- Dominio incompleto.
+- Extensión de dominio inválida.
+
+Ejemplo rechazado:
+
+```text
+usuario..test@gmail.com
+```
+
+Ejemplo aceptado:
+
+```text
+usuario@gmail.com
+```
+
+## Contraseñas
+
+Las pruebas verifican:
+
+- Contraseñas iguales.
+- Contraseñas diferentes.
+- Comportamiento con valores vacíos.
+
+---
+
+# Ejemplo de un test con Vitest
+
+```javascript
+import {
+    describe,
+    it,
+    expect
+} from "vitest";
+
+describe("Carrito NexaGear", function() {
+
+    it("debe calcular correctamente el subtotal", function() {
+
+        const resultado =
+            calcularSubtotal(29990, 2);
+
+        expect(resultado).toBe(59980);
+    });
+
+});
+```
+
+Si la función devuelve:
+
+```text
+59980
+```
+
+la prueba finaliza correctamente.
+
+---
+
+# Demostrar un test fallido
+
+Para demostrar el funcionamiento de Vitest durante la presentación puede modificarse temporalmente un resultado esperado.
+
+Test correcto:
 
 ```javascript
 expect(
@@ -189,15 +399,20 @@ expect(
 ).toBe(50000);
 ```
 
-Luego ejecutar:
+Ejecutar:
 
 ```bash
-npm test
+npx vitest run
 ```
 
-Karma y Jasmine deberían indicar que existe una prueba fallida.
+Vitest mostrará una prueba fallida porque:
 
-Después de la demostración se debe restaurar el valor correcto:
+```text
+Valor recibido: 59980
+Valor esperado: 50000
+```
+
+Después de la demostración se debe restaurar:
 
 ```javascript
 expect(
@@ -205,17 +420,72 @@ expect(
 ).toBe(59980);
 ```
 
-Y volver a ejecutar:
+y volver a ejecutar:
 
 ```bash
-npm test
+npx vitest run
 ```
 
-El resultado debería volver a mostrar:
+El resultado debe volver a:
 
 ```text
-TOTAL: 28 SUCCESS
+Tests 28 passed (28)
 ```
+
+---
+
+# Cobertura de testing
+
+Para ejecutar las pruebas con cobertura:
+
+```bash
+npx vitest run --coverage
+```
+
+Si existe el script correspondiente en `package.json`, también puede utilizarse:
+
+```bash
+npm run coverage
+```
+
+Vitest permite analizar:
+
+- Statements.
+- Branches.
+- Functions.
+- Lines.
+
+Los porcentajes utilizados en el informe de cobertura deben corresponder a los resultados reales entregados por Vitest.
+
+---
+
+# Generar reporte TXT de los tests
+
+Para guardar el resultado de las pruebas en un archivo de texto utilizando Git Bash:
+
+```bash
+npx vitest run > reporte_tests_vitest.txt 2>&1
+```
+
+Esto genera:
+
+```text
+reporte_tests_vitest.txt
+```
+
+Para guardar el reporte de cobertura:
+
+```bash
+npx vitest run --coverage > reporte_cobertura_vitest.txt 2>&1
+```
+
+Esto genera:
+
+```text
+reporte_cobertura_vitest.txt
+```
+
+Estos archivos pueden utilizarse como evidencia del proceso de testing.
 
 ---
 
@@ -223,20 +493,29 @@ TOTAL: 28 SUCCESS
 
 | Comando | Descripción |
 |---|---|
-| `npm install` | Instala las dependencias del proyecto |
-| `npm run dev` | Inicia el servidor de desarrollo |
-| `npm run build` | Genera la versión de producción en `dist/` |
-| `npm run preview` | Sirve localmente la versión compilada |
-| `npm test` | Ejecuta las pruebas con Karma y Jasmine |
+| `npm install` | Instala las dependencias |
+| `npm run dev` | Inicia NexaGear en desarrollo |
+| `npm run build` | Genera la aplicación para producción |
+| `npm run preview` | Visualiza localmente la compilación |
+| `npx vitest run` | Ejecuta las 28 pruebas |
+| `npx vitest run --coverage` | Ejecuta pruebas y calcula cobertura |
+| `npm test` | Ejecuta Vitest si está configurado en scripts |
 | `node -v` | Muestra la versión de Node.js |
 | `npm -v` | Muestra la versión de npm |
+| `git status` | Muestra el estado del repositorio |
+| `git pull --rebase origin main` | Actualiza el repositorio local |
+| `git push origin main` | Sube los cambios a GitHub |
 
 ---
 
-# Estructura general
+# Estructura general del proyecto
 
 ```text
 NexaGear-Parcial-2
+│
+├── .github
+│   └── workflows
+│       └── deploy.yml
 │
 ├── public
 │   └── img
@@ -247,12 +526,17 @@ NexaGear-Parcial-2
 │   ├── pages
 │   ├── services
 │   ├── tests
+│   │   ├── carrito.spec.js
+│   │   ├── productosRegistro.spec.js
+│   │   └── casosPosibles.spec.js
+│   │
 │   ├── utils
+│   │   └── logicaNexaGear.js
+│   │
 │   ├── app.jsx
 │   └── Main.jsx
 │
 ├── index.html
-├── karma.conf.js
 ├── package.json
 ├── package-lock.json
 ├── vite.config.js
@@ -265,96 +549,195 @@ NexaGear-Parcial-2
 
 NexaGear utiliza `localStorage` para simular la persistencia de información en el navegador.
 
-Las claves utilizadas son:
+Las principales claves utilizadas son:
 
 | Clave | Contenido |
 |---|---|
 | `carrito` | Productos agregados, cantidades y precios |
-| `productosAdmin` | Catálogo y stock actualizado desde el panel |
-| `categoriasAdmin` | Categorías creadas por el administrador |
+| `productosAdmin` | Catálogo y stock actualizado |
+| `categoriasAdmin` | Categorías creadas desde administración |
 | `usuariosAdmin` | Usuarios registrados |
-| `sesionUsuario` | Datos del usuario con sesión activa |
-| `pedidosAdmin` | Pedidos generados en el checkout |
-| `ultimoPedido` | Copia del último pedido realizado |
-| `perfilAdmin` | Datos del perfil del administrador |
+| `sesionUsuario` | Usuario con sesión activa |
+| `pedidosAdmin` | Pedidos realizados |
+| `ultimoPedido` | Último pedido generado |
+| `perfilAdmin` | Información del perfil administrativo |
 
 Esto permite mantener la información aunque se actualice la página.
 
-Para reiniciar los datos se puede ejecutar `localStorage.clear()` en la consola del navegador o eliminar los datos del sitio desde las herramientas de desarrollo.
+Para borrar los datos almacenados durante las pruebas se puede utilizar en la consola:
+
+```javascript
+localStorage.clear();
+```
 
 ---
 
-# Testing
+# Control de stock
 
-Las pruebas se encuentran principalmente en:
+Los productos poseen una cantidad de stock disponible.
+
+El sistema permite:
+
+- Definir stock desde el panel de administración.
+- Mostrar el stock disponible al cliente.
+- Mostrar `Sin stock` cuando la cantidad llega a cero.
+- Deshabilitar la compra de productos agotados.
+- Impedir superar el stock disponible desde el carrito.
+- Validar nuevamente el stock durante el checkout.
+- Descontar automáticamente el stock después de realizar una compra.
+
+Ejemplo:
 
 ```text
-src/tests/
+Stock inicial: 2
+Compra: 1 unidad
+Stock restante: 1
 ```
 
-La lógica utilizada por las pruebas se encuentra en:
+Si se compra la última unidad:
 
 ```text
-src/utils/logicaNexaGear.js
+Stock: 0
+Estado: Sin stock
 ```
 
-Las pruebas permiten verificar funcionalidades como:
+---
 
-- Cálculo de subtotales.
-- Cálculo del total del carrito.
-- Aumento de cantidades.
-- Eliminación de productos.
-- Precio de productos en oferta.
-- Filtrado de ofertas.
-- Validación de correos.
-- Validación de contraseñas.
+# Validaciones
 
-Los archivos de prueba son:
+## Registro
 
-| Archivo | Contenido |
-|---|---|
-| `src/tests/carrito.spec.js` | 4 pruebas sobre subtotales, total, cantidades y eliminación |
-| `src/tests/productosRegistro.spec.js` | 6 pruebas sobre ofertas, precios, correos y contraseñas |
-| `src/tests/casosPosibles.spec.js` | 18 pruebas sobre casos posibles del carrito, ofertas y validaciones |
+El formulario de registro valida:
 
-En total se ejecutan **28 pruebas**, con **100% de cobertura** en sentencias, ramas, funciones y líneas. Además, Karma genera un reporte de cobertura en `coverage/html/index.html`.
+- Nombre obligatorio.
+- Nombre solo con letras.
+- Apellido obligatorio.
+- Apellido solo con letras.
+- Correo electrónico válido.
+- Correo no duplicado.
+- Contraseña mínima.
+- Confirmación de contraseña.
+- Contraseñas coincidentes.
+- Fecha de nacimiento no futura.
+
+## Checkout
+
+El checkout valida:
+
+- Nombre completo.
+- Nombre solo con letras.
+- Correo electrónico válido.
+- Dirección obligatoria.
+- Comuna obligatoria.
+- Comuna solo con letras.
+- Teléfono de exactamente 9 números.
+- Tipo de entrega.
+- Stock disponible antes de confirmar la compra.
+
+Ejemplo de teléfono válido:
+
+```text
+912345678
+```
+
+Ejemplo de correo inválido:
+
+```text
+matias@gmail..com
+```
+
+---
+
+# Arquitectura del proyecto
+
+La aplicación divide responsabilidades utilizando diferentes carpetas:
+
+```text
+components/
+```
+
+Componentes reutilizables de interfaz.
+
+```text
+pages/
+```
+
+Vistas principales de la aplicación.
+
+```text
+services/
+```
+
+Funciones relacionadas con acceso y persistencia de datos.
+
+```text
+data/
+```
+
+Datos iniciales de productos.
+
+```text
+utils/
+```
+
+Funciones reutilizables de lógica.
+
+```text
+tests/
+```
+
+Pruebas unitarias ejecutadas con Vitest.
+
+Esta separación facilita el mantenimiento y organización del código.
 
 ---
 
 # Limitaciones conocidas
 
-Este proyecto es una simulación académica, por lo que presenta las siguientes limitaciones:
+NexaGear es una aplicación frontend desarrollada con fines académicos.
 
-- El inicio de sesión es simulado: no se almacena ni se compara la contraseña.
-- Las rutas de administración no cuentan con control de acceso.
-- La información se guarda en `localStorage`, por lo que es local a cada navegador.
-- El formulario de contacto no persiste los mensajes enviados.
-- La página de error de pago existe, pero no está conectada a un flujo real.
-- Las categorías creadas en el panel no se muestran en la vista pública si no tienen productos asociados.
+Actualmente presenta las siguientes limitaciones:
+
+- No utiliza una base de datos real.
+- La información se almacena mediante `localStorage`.
+- Los datos son locales a cada navegador.
+- El inicio de sesión es simulado.
+- No existe autenticación mediante backend.
+- Las rutas administrativas no poseen autorización mediante servidor.
+- El formulario de contacto no envía información a un servidor.
+- El procesamiento de pagos es simulado.
 
 ---
 
-# Importante
+# Entrega del proyecto
 
-No es necesario incluir la carpeta:
+Para comprimir el proyecto no es necesario incluir:
 
 ```text
 node_modules
 ```
 
-al comprimir el proyecto para la entrega.
+Tampoco es necesario incluir:
 
-Las dependencias pueden recuperarse nuevamente ejecutando:
+```text
+dist
+```
+
+si el proyecto será compilado nuevamente.
+
+Las dependencias pueden recuperarse ejecutando:
 
 ```bash
 npm install
 ```
 
-## Proyecto académico
+---
+
+# Proyecto académico
 
 Proyecto desarrollado para la **Evaluación Parcial 2 de Desarrollo Fullstack II**.
 
-## Integrantes 
+## Integrantes
 
 - Matias Acevedo
 - Felipe Marchant

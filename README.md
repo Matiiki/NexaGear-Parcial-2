@@ -45,6 +45,27 @@ El proyecto incluye:
 
 ---
 
+# Rutas principales
+
+La aplicación utiliza `HashRouter`, por lo que las rutas se muestran con `#` en la URL.
+
+| Ruta | Página | Descripción |
+|---|---|---|
+| `/#/` | Home | Página de inicio |
+| `/#/productos` | Productos | Catálogo completo |
+| `/#/producto/:id` | ProductoDetalle | Detalle de un producto |
+| `/#/categorias` | Categorías | Productos filtrados por categoría |
+| `/#/ofertas` | Ofertas | Productos con descuento |
+| `/#/carrito` | Carrito | Productos agregados y total |
+| `/#/checkout` | Checkout | Datos de envío y confirmación de compra |
+| `/#/compra-exitosa` | CompraExitosa | Confirmación del pedido |
+| `/#/login` | Login | Inicio de sesión |
+| `/#/registro` | Registro | Creación de cuenta |
+| `/#/contacto` | Contacto | Formulario de contacto |
+| `/#/admin` | AdminDashboard | Panel de administración |
+
+---
+
 # Cómo ejecutar el proyecto
 
 ## 1. Requisitos
@@ -61,6 +82,8 @@ node v14.x
 npm 6.x
 ```
 
+También fue probado con Node.js 22 y npm 10 sin necesidad de modificar el código.
+
 ## 2. Instalar dependencias
 
 Después de descargar o clonar el proyecto, abrir una terminal dentro de la carpeta del proyecto.
@@ -72,6 +95,8 @@ npm install
 ```
 
 Este comando instalará todas las dependencias especificadas en `package.json`.
+
+> **Nota para Windows:** si usas PowerShell y el comando `npm` está bloqueado por la política de ejecución de scripts, utiliza `npm.cmd` (por ejemplo, `npm.cmd install` o `npm.cmd run dev`).
 
 ---
 
@@ -123,10 +148,10 @@ npm test
 Si todas las pruebas funcionan correctamente, la terminal mostrará un resultado similar a:
 
 ```text
-TOTAL: 10 SUCCESS
+TOTAL: 28 SUCCESS
 ```
 
-Esto significa que las 10 pruebas fueron ejecutadas correctamente.
+Esto significa que las 28 pruebas fueron ejecutadas correctamente.
 
 ---
 
@@ -189,42 +214,22 @@ npm test
 El resultado debería volver a mostrar:
 
 ```text
-TOTAL: 10 SUCCESS
+TOTAL: 28 SUCCESS
 ```
 
 ---
 
 # Comandos principales
 
-Instalar dependencias:
-
-```bash
-npm install
-```
-
-Iniciar la aplicación:
-
-```bash
-npm run dev
-```
-
-Ejecutar pruebas:
-
-```bash
-npm test
-```
-
-Ver versión de Node.js:
-
-```bash
-node -v
-```
-
-Ver versión de npm:
-
-```bash
-npm -v
-```
+| Comando | Descripción |
+|---|---|
+| `npm install` | Instala las dependencias del proyecto |
+| `npm run dev` | Inicia el servidor de desarrollo |
+| `npm run build` | Genera la versión de producción en `dist/` |
+| `npm run preview` | Sirve localmente la versión compilada |
+| `npm test` | Ejecuta las pruebas con Karma y Jasmine |
+| `node -v` | Muestra la versión de Node.js |
+| `npm -v` | Muestra la versión de npm |
 
 ---
 
@@ -260,18 +265,22 @@ NexaGear-Parcial-2
 
 NexaGear utiliza `localStorage` para simular la persistencia de información en el navegador.
 
-Se almacenan datos como:
+Las claves utilizadas son:
 
-- Productos.
-- Stock.
-- Usuarios registrados.
-- Sesión del usuario.
-- Carrito.
-- Pedidos.
-- Categorías.
-- Datos administrativos.
+| Clave | Contenido |
+|---|---|
+| `carrito` | Productos agregados, cantidades y precios |
+| `productosAdmin` | Catálogo y stock actualizado desde el panel |
+| `categoriasAdmin` | Categorías creadas por el administrador |
+| `usuariosAdmin` | Usuarios registrados |
+| `sesionUsuario` | Datos del usuario con sesión activa |
+| `pedidosAdmin` | Pedidos generados en el checkout |
+| `ultimoPedido` | Copia del último pedido realizado |
+| `perfilAdmin` | Datos del perfil del administrador |
 
 Esto permite mantener la información aunque se actualice la página.
+
+Para reiniciar los datos se puede ejecutar `localStorage.clear()` en la consola del navegador o eliminar los datos del sitio desde las herramientas de desarrollo.
 
 ---
 
@@ -300,6 +309,29 @@ Las pruebas permiten verificar funcionalidades como:
 - Validación de correos.
 - Validación de contraseñas.
 
+Los archivos de prueba son:
+
+| Archivo | Contenido |
+|---|---|
+| `src/tests/carrito.spec.js` | 4 pruebas sobre subtotales, total, cantidades y eliminación |
+| `src/tests/productosRegistro.spec.js` | 6 pruebas sobre ofertas, precios, correos y contraseñas |
+| `src/tests/casosPosibles.spec.js` | 18 pruebas sobre casos posibles del carrito, ofertas y validaciones |
+
+En total se ejecutan **28 pruebas**, con **100% de cobertura** en sentencias, ramas, funciones y líneas. Además, Karma genera un reporte de cobertura en `coverage/html/index.html`.
+
+---
+
+# Limitaciones conocidas
+
+Este proyecto es una simulación académica, por lo que presenta las siguientes limitaciones:
+
+- El inicio de sesión es simulado: no se almacena ni se compara la contraseña.
+- Las rutas de administración no cuentan con control de acceso.
+- La información se guarda en `localStorage`, por lo que es local a cada navegador.
+- El formulario de contacto no persiste los mensajes enviados.
+- La página de error de pago existe, pero no está conectada a un flujo real.
+- Las categorías creadas en el panel no se muestran en la vista pública si no tienen productos asociados.
+
 ---
 
 # Importante
@@ -323,5 +355,6 @@ npm install
 Proyecto desarrollado para la **Evaluación Parcial 2 de Desarrollo Fullstack II**.
 
 ## Integrantes 
--Matias Acevedo
--Felipe Marchant 
+
+- Matias Acevedo
+- Felipe Marchant

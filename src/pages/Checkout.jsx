@@ -5,6 +5,10 @@ import {
     obtenerProductos
 } from "../services/productosService.js";
 
+import {
+    correoEsValido
+} from "../utils/logicaNexaGear.js";
+
 
 function Checkout({
     carrito,
@@ -31,9 +35,10 @@ function Checkout({
                 ? usuario.nombre + " " + usuario.apellido
                 : "",
 
-            correo: usuario
-                ? usuario.correo
-                : "",
+            correo:
+                usuario && usuario.correo
+                    ? usuario.correo.toLowerCase()
+                    : "",
 
             direccion: "",
             comuna: "",
@@ -98,6 +103,25 @@ function Checkout({
     }
 
 
+    function manejarCorreo(evento) {
+
+        const correo =
+            evento.target.value.toLowerCase();
+
+
+        setDatos({
+            ...datos,
+            correo: correo
+        });
+
+
+        setErrores({
+            ...errores,
+            correo: ""
+        });
+    }
+
+
     function manejarComuna(evento) {
 
         const valor =
@@ -149,6 +173,8 @@ function Checkout({
             /^[a-zA-ZÁÉÍÓÚáéíóúÑñÜü\s'-]{2,}$/;
 
 
+        // NOMBRE
+
         if (
             datos.nombre.trim() === ""
         ) {
@@ -167,6 +193,8 @@ function Checkout({
         }
 
 
+        // CORREO
+
         if (
             datos.correo.trim() === ""
         ) {
@@ -174,23 +202,18 @@ function Checkout({
             nuevosErrores.correo =
                 "Ingrese su correo electrónico.";
 
-        } else {
+        } else if (
+            !correoEsValido(
+                datos.correo
+            )
+        ) {
 
-            const regexCorreo =
-                /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-
-            if (
-                !regexCorreo.test(
-                    datos.correo
-                )
-            ) {
-
-                nuevosErrores.correo =
-                    "Ingrese un correo electrónico válido.";
-            }
+            nuevosErrores.correo =
+                "Ingrese un correo electrónico válido.";
         }
 
+
+        // DIRECCIÓN
 
         if (
             datos.direccion.trim() === ""
@@ -200,6 +223,8 @@ function Checkout({
                 "Ingrese su dirección.";
         }
 
+
+        // COMUNA
 
         if (
             datos.comuna.trim() === ""
@@ -219,6 +244,8 @@ function Checkout({
         }
 
 
+        // TELÉFONO
+
         if (
             datos.telefono.trim() === ""
         ) {
@@ -236,6 +263,8 @@ function Checkout({
                 "El teléfono debe contener exactamente 9 números.";
         }
 
+
+        // ENTREGA
 
         if (
             datos.entrega === ""
@@ -423,7 +452,9 @@ function Checkout({
                 datos.nombre.trim(),
 
             correo:
-                datos.correo.trim(),
+                datos.correo
+                    .trim()
+                    .toLowerCase(),
 
             direccion:
                 datos.direccion.trim(),
@@ -536,6 +567,8 @@ function Checkout({
                     >
 
 
+                        {/* NOMBRE */}
+
                         <div className="mb-3">
 
                             <label className="form-label">
@@ -572,6 +605,8 @@ function Checkout({
                         </div>
 
 
+                        {/* CORREO */}
+
                         <div className="mb-3">
 
                             <label className="form-label">
@@ -593,8 +628,9 @@ function Checkout({
                                     datos.correo
                                 }
                                 onChange={
-                                    manejarCambio
+                                    manejarCorreo
                                 }
+                                placeholder="usuario@gmail.com"
                             />
 
                             {errores.correo && (
@@ -607,6 +643,8 @@ function Checkout({
 
                         </div>
 
+
+                        {/* DIRECCIÓN */}
 
                         <div className="mb-3">
 
@@ -644,6 +682,8 @@ function Checkout({
                         </div>
 
 
+                        {/* COMUNA */}
+
                         <div className="mb-3">
 
                             <label className="form-label">
@@ -679,6 +719,8 @@ function Checkout({
 
                         </div>
 
+
+                        {/* TELÉFONO */}
 
                         <div className="mb-3">
 
@@ -718,6 +760,8 @@ function Checkout({
 
                         </div>
 
+
+                        {/* ENTREGA */}
 
                         <div className="mb-3">
 

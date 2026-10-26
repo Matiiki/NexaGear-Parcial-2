@@ -72,7 +72,7 @@ describe("Productos y registro NexaGear", function() {
 
         expect(
             correoEsValido("usuario@")
-        ).toBeFalse();
+        ).toBe(false);
     });
 
 
@@ -82,7 +82,7 @@ describe("Productos y registro NexaGear", function() {
             correoEsValido(
                 "usuario@gmail.com"
             )
-        ).toBeTrue();
+        ).toBe(true);
     });
 
 
@@ -93,7 +93,7 @@ describe("Productos y registro NexaGear", function() {
                 "NexaGear123",
                 "NexaGear123"
             )
-        ).toBeTrue();
+        ).toBe(true);
     });
 
 });

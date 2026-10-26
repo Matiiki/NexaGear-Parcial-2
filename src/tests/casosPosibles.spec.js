@@ -178,7 +178,7 @@ describe("Casos posibles de validaciones", function() {
 
         expect(
             correoEsValido("  USUARIO@GMAIL.COM  ")
-        ).toBeTrue();
+        ).toBe(true);
     });
 
 
@@ -186,7 +186,7 @@ describe("Casos posibles de validaciones", function() {
 
         expect(
             correoEsValido("usuario..test@gmail.com")
-        ).toBeFalse();
+        ).toBe(false);
     });
 
 
@@ -194,7 +194,7 @@ describe("Casos posibles de validaciones", function() {
 
         expect(
             correoEsValido("usuario@gmail")
-        ).toBeFalse();
+        ).toBe(false);
     });
 
 
@@ -202,7 +202,7 @@ describe("Casos posibles de validaciones", function() {
 
         expect(
             correoEsValido("usuario@@gmail.com")
-        ).toBeFalse();
+        ).toBe(false);
     });
 
 
@@ -210,7 +210,7 @@ describe("Casos posibles de validaciones", function() {
 
         expect(
             correoEsValido("a@b.c")
-        ).toBeFalse();
+        ).toBe(false);
     });
 
 
@@ -221,7 +221,7 @@ describe("Casos posibles de validaciones", function() {
                 "NexaGear123",
                 "NexaGear456"
             )
-        ).toBeFalse();
+        ).toBe(false);
     });
 
 
@@ -229,7 +229,7 @@ describe("Casos posibles de validaciones", function() {
 
         expect(
             contrasenasCoinciden("", "")
-        ).toBeTrue();
+        ).toBe(true);
     });
 
 });

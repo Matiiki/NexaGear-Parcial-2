@@ -1,0 +1,16 @@
+
+> NexaGear-Parcial-2@1.0.0 test C:\Users\av-alumno\Desktop\Nueva carpeta\NexaGear-Parcial-2
+> vitest run
+
+
+[7m[1m[36m RUN [39m[22m[27m [36mv0.34.6[39m [90mC:/Users/av-alumno/Desktop/Nueva carpeta/NexaGear-Parcial-2[39m
+
+ [32m✓[39m src/tests/carrito.spec.js [2m ([22m[2m4 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+ [32m✓[39m src/tests/productosRegistro.spec.js [2m ([22m[2m6 tests[22m[2m)[22m[90m 4[2mms[22m[39m
+ [32m✓[39m src/tests/casosPosibles.spec.js [2m ([22m[2m18 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m28 passed[39m[22m[90m (28)[39m
+[2m   Start at [22m 12:53:57
+[2m   Duration [22m 598ms[2m (transform 122ms, setup 0ms, collect 159ms, tests 12ms, environment 1ms, prepare 529ms)[22m
+

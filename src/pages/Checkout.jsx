@@ -1,45 +1,30 @@
+
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 
-import {
-    obtenerProductos
-} from "../services/productosService.js";
+import { obtenerProductos } from "../services/productosService.js";
 
 import {
-    correoEsValido
+    correoEsValido,
+    calcularTotal
 } from "../utils/logicaNexaGear.js";
 
 
-function Checkout({
-    carrito,
-    setCarrito
-}) {
+function Checkout({ carrito, setCarrito }) {
 
     const history = useHistory();
 
-
     const [datos, setDatos] = useState(function() {
-
-        const sesionGuardada =
-            localStorage.getItem("sesionUsuario");
-
-        const usuario =
-            sesionGuardada
-                ? JSON.parse(sesionGuardada)
-                : null;
-
+        const sesion = localStorage.getItem("sesionUsuario");
+        const usuario = sesion ? JSON.parse(sesion) : null;
 
         return {
-
             nombre: usuario
-                ? usuario.nombre + " " + usuario.apellido
+                ? [usuario.nombre, usuario.apellido].filter(Boolean).join(" ")
                 : "",
-
-            correo:
-                usuario && usuario.correo
-                    ? usuario.correo.toLowerCase()
-                    : "",
-
+            correo: usuario && usuario.correo
+                ? usuario.correo.toLowerCase()
+                : "",
             direccion: "",
             comuna: "",
             telefono: "",
@@ -47,788 +32,416 @@ function Checkout({
         };
     });
 
+    const [errores, setErrores] = useState({});
+    const [simularRechazo, setSimularRechazo] = useState(false);
 
-    const [errores, setErrores] =
-        useState({});
+    const total = calcularTotal(carrito);
+    const neto = Math.round(total / 1.19);
+    const iva = total - neto;
 
-
-    function soloLetras(valor) {
-
-        return valor.replace(
-            /[^a-zA-ZÁÉÍÓÚáéíóúÑñÜü\s'-]/g,
-            ""
-        );
+    function formatoPrecio(valor) {
+        return "$" + valor.toLocaleString("es-CL");
     }
-
 
     function manejarCambio(evento) {
+        const { name, value } = evento.target;
+        let valor = value;
 
-        const {
-            name,
-            value
-        } = evento.target;
-
-
-        setDatos({
-            ...datos,
-            [name]: value
-        });
-
-
-        setErrores({
-            ...errores,
-            [name]: ""
-        });
-    }
-
-
-    function manejarNombre(evento) {
-
-        const valor =
-            soloLetras(
-                evento.target.value
-            );
-
-
-        setDatos({
-            ...datos,
-            nombre: valor
-        });
-
-
-        setErrores({
-            ...errores,
-            nombre: ""
-        });
-    }
-
-
-    function manejarCorreo(evento) {
-
-        const correo =
-            evento.target.value.toLowerCase();
-
-
-        setDatos({
-            ...datos,
-            correo: correo
-        });
-
-
-        setErrores({
-            ...errores,
-            correo: ""
-        });
-    }
-
-
-    function manejarComuna(evento) {
-
-        const valor =
-            soloLetras(
-                evento.target.value
-            );
-
-
-        setDatos({
-            ...datos,
-            comuna: valor
-        });
-
-
-        setErrores({
-            ...errores,
-            comuna: ""
-        });
-    }
-
-
-    function manejarTelefono(evento) {
-
-        const soloNumeros =
-            evento.target.value.replace(
-                /\D/g,
+        if (name === "nombre" || name === "comuna") {
+            valor = value.replace(
+                /[^a-zA-ZÁÉÍÓÚáéíóúÑñÜü\s'-]/g,
                 ""
             );
+        }
 
+        if (name === "telefono") {
+            valor = value.replace(/\D/g, "").slice(0, 9);
+        }
 
-        setDatos({
-            ...datos,
-            telefono: soloNumeros
+        if (name === "correo") {
+            valor = value.toLowerCase();
+        }
+
+        setDatos(function(anterior) {
+            return {
+                ...anterior,
+                [name]: valor
+            };
         });
 
-
-        setErrores({
-            ...errores,
-            telefono: ""
+        setErrores(function(anterior) {
+            return {
+                ...anterior,
+                [name]: ""
+            };
         });
     }
-
 
     function validarFormulario() {
 
         const nuevosErrores = {};
-
-        const regexNombre =
+        const regexLetras =
             /^[a-zA-ZÁÉÍÓÚáéíóúÑñÜü\s'-]{2,}$/;
 
-
-        // NOMBRE
-
-        if (
-            datos.nombre.trim() === ""
-        ) {
-
+        if (!regexLetras.test(datos.nombre.trim())) {
             nuevosErrores.nombre =
-                "Ingrese su nombre completo.";
-
-        } else if (
-            !regexNombre.test(
-                datos.nombre.trim()
-            )
-        ) {
-
-            nuevosErrores.nombre =
-                "El nombre solo puede contener letras.";
+                "Ingrese un nombre válido, solo con letras.";
         }
 
-
-        // CORREO
-
-        if (
-            datos.correo.trim() === ""
-        ) {
-
+        if (datos.correo.trim() === "") {
             nuevosErrores.correo =
                 "Ingrese su correo electrónico.";
-
-        } else if (
-            !correoEsValido(
-                datos.correo
-            )
-        ) {
-
+        } else if (!correoEsValido(datos.correo)) {
             nuevosErrores.correo =
                 "Ingrese un correo electrónico válido.";
         }
 
-
-        // DIRECCIÓN
-
-        if (
-            datos.direccion.trim() === ""
-        ) {
-
+        if (datos.direccion.trim() === "") {
             nuevosErrores.direccion =
                 "Ingrese su dirección.";
         }
 
-
-        // COMUNA
-
-        if (
-            datos.comuna.trim() === ""
-        ) {
-
+        if (!regexLetras.test(datos.comuna.trim())) {
             nuevosErrores.comuna =
-                "Ingrese su comuna.";
-
-        } else if (
-            !regexNombre.test(
-                datos.comuna.trim()
-            )
-        ) {
-
-            nuevosErrores.comuna =
-                "La comuna solo puede contener letras.";
+                "Ingrese una comuna válida, solo con letras.";
         }
 
-
-        // TELÉFONO
-
-        if (
-            datos.telefono.trim() === ""
-        ) {
-
-            nuevosErrores.telefono =
-                "Ingrese su teléfono.";
-
-        } else if (
-            !/^[0-9]{9}$/.test(
-                datos.telefono
-            )
-        ) {
-
+        if (!/^[0-9]{9}$/.test(datos.telefono)) {
             nuevosErrores.telefono =
                 "El teléfono debe contener exactamente 9 números.";
         }
 
-
-        // ENTREGA
-
-        if (
-            datos.entrega === ""
-        ) {
-
+        if (datos.entrega === "") {
             nuevosErrores.entrega =
                 "Seleccione un tipo de entrega.";
         }
 
+        setErrores(nuevosErrores);
 
-        setErrores(
-            nuevosErrores
-        );
-
-
-        return (
-            Object.keys(
-                nuevosErrores
-            ).length === 0
-        );
+        return Object.keys(nuevosErrores).length === 0;
     }
 
+    function validarStock() {
 
-    function validarStockActual() {
+        const productosActuales = obtenerProductos();
 
-        const productosActuales =
-            obtenerProductos();
+        for (const item of carrito) {
 
+            const producto = productosActuales.find(function(p) {
+                return p.id === item.id;
+            });
 
-        for (
-            let i = 0;
-            i < carrito.length;
-            i++
-        ) {
-
-            const productoCarrito =
-                carrito[i];
-
-
-            const productoActual =
-                productosActuales.find(
-                    function(producto) {
-
-                        return (
-                            producto.id ===
-                            productoCarrito.id
-                        );
-                    }
-                );
-
-
-            if (!productoActual) {
-
+            if (!producto) {
                 window.alert(
-                    "Uno de los productos ya no está disponible."
+                    "Un producto del carrito ya no está disponible."
                 );
-
-                return false;
+                return null;
             }
 
-
-            const stockActual =
-                Number(
-                    productoActual.stock
-                );
-
-
             if (
-                stockActual <
-                productoCarrito.cantidad
+                !Number.isInteger(item.cantidad) ||
+                item.cantidad <= 0 ||
+                Number(producto.stock) < item.cantidad
             ) {
-
                 window.alert(
-                    "No hay stock suficiente de " +
-                    productoActual.nombre +
-                    ". Stock disponible: " +
-                    stockActual
+                    "Stock insuficiente de " + producto.nombre +
+                    ". Disponibles: " + producto.stock
                 );
-
-                return false;
+                return null;
             }
         }
 
-
-        return true;
+        return productosActuales;
     }
-
-
-    function descontarStock() {
-
-        const productosActuales =
-            obtenerProductos();
-
-
-        const productosActualizados =
-            productosActuales.map(
-                function(producto) {
-
-                    const productoComprado =
-                        carrito.find(
-                            function(item) {
-
-                                return (
-                                    item.id ===
-                                    producto.id
-                                );
-                            }
-                        );
-
-
-                    if (
-                        productoComprado
-                    ) {
-
-                        return {
-                            ...producto,
-
-                            stock:
-                                Number(
-                                    producto.stock
-                                ) -
-                                productoComprado.cantidad
-                        };
-                    }
-
-
-                    return producto;
-                }
-            );
-
-
-        localStorage.setItem(
-            "productosAdmin",
-            JSON.stringify(
-                productosActualizados
-            )
-        );
-    }
-
 
     function finalizarCompra(evento) {
 
         evento.preventDefault();
 
-
-        if (
-            !validarFormulario()
-        ) {
-
+        if (carrito.length === 0) {
             return;
         }
 
-
-        if (
-            !validarStockActual()
-        ) {
-
+        if (!validarFormulario()) {
             return;
         }
 
+        const productosActuales = validarStock();
 
-        const totalPedido =
-            carrito.reduce(
-                function(
-                    acumulado,
-                    producto
-                ) {
+        if (!productosActuales) {
+            return;
+        }
 
-                    return (
-                        acumulado +
-                        producto.precio *
-                        producto.cantidad
-                    );
-                },
-                0
+        // SIMULACIÓN DE PAGO RECHAZADO
+        if (simularRechazo) {
+
+            sessionStorage.setItem(
+                "ultimoPagoFallido",
+                JSON.stringify({
+                    fecha: new Date().toLocaleString("es-CL"),
+                    total: total,
+                    motivo: "Pago rechazado (simulación)"
+                })
             );
 
+            // No se guarda pedido.
+            // No se descuenta stock.
+            // No se vacía el carrito.
+            history.push("/pago-error");
 
+            return;
+        }
+
+        // SIMULACIÓN DE PAGO EXITOSO
         const nuevoPedido = {
-
-            id:
-                Date.now(),
-
-            cliente:
-                datos.nombre.trim(),
-
-            correo:
-                datos.correo
-                    .trim()
-                    .toLowerCase(),
-
-            direccion:
-                datos.direccion.trim(),
-
-            comuna:
-                datos.comuna.trim(),
-
-            telefono:
-                datos.telefono.trim(),
-
-            entrega:
-                datos.entrega,
-
-            productos:
-                carrito,
-
-            total:
-                totalPedido,
-
-            fecha:
-                new Date()
-                    .toLocaleString(
-                        "es-CL"
-                    ),
-
-            estado:
-                "Pendiente"
+            id: Date.now(),
+            cliente: datos.nombre.trim(),
+            correo: datos.correo.trim().toLowerCase(),
+            direccion: datos.direccion.trim(),
+            comuna: datos.comuna.trim(),
+            telefono: datos.telefono,
+            entrega: datos.entrega,
+            productos: carrito.map(function(item) {
+                return { ...item };
+            }),
+            total: total,
+            fecha: new Date().toLocaleString("es-CL"),
+            estado: "Pendiente"
         };
 
-
         const pedidosGuardados =
-            localStorage.getItem(
-                "pedidosAdmin"
-            );
+            localStorage.getItem("pedidosAdmin");
 
+        const pedidos = pedidosGuardados
+            ? JSON.parse(pedidosGuardados)
+            : [];
 
-        const pedidos =
-            pedidosGuardados
-                ? JSON.parse(
-                    pedidosGuardados
-                )
-                : [];
+        const productosActualizados = productosActuales.map(
+            function(producto) {
 
+                const comprado = carrito.find(function(item) {
+                    return item.id === producto.id;
+                });
+
+                if (!comprado) {
+                    return producto;
+                }
+
+                return {
+                    ...producto,
+                    stock: Number(producto.stock) - comprado.cantidad
+                };
+            }
+        );
 
         localStorage.setItem(
             "pedidosAdmin",
-            JSON.stringify([
-                ...pedidos,
-                nuevoPedido
-            ])
+            JSON.stringify([...pedidos, nuevoPedido])
         );
-
 
         localStorage.setItem(
             "ultimoPedido",
-            JSON.stringify(
-                nuevoPedido
-            )
+            JSON.stringify(nuevoPedido)
         );
 
+        localStorage.setItem(
+            "productosAdmin",
+            JSON.stringify(productosActualizados)
+        );
 
-        descontarStock();
-
+        sessionStorage.removeItem("ultimoPagoFallido");
 
         setCarrito([]);
 
-
-        history.push(
-            "/compra-exitosa"
-        );
+        history.push("/compra-exitosa");
     }
 
-
-    if (
-        carrito.length === 0
-    ) {
-
+    if (carrito.length === 0) {
         return (
-
             <main className="container py-5 text-center">
-
-                <h1>
-                    No hay productos en el carrito
-                </h1>
-
+                <h1>Tu carrito está vacío</h1>
             </main>
-
         );
     }
-
 
     return (
-
         <main className="container py-5">
-
             <div className="row justify-content-center">
+                <div className="col-12 col-lg-8">
 
-                <div className="col-12 col-lg-7">
-
-                    <h1 className="mb-4">
-                        Checkout
+                    <h1 className="fw-bold mb-4">
+                        Finalizar compra
                     </h1>
 
+                    <form onSubmit={finalizarCompra} noValidate>
 
-                    <form
-                        onSubmit={
-                            finalizarCompra
-                        }
-                        noValidate
-                    >
+                        <h2 className="h5 mb-3">
+                            Datos del cliente
+                        </h2>
 
+                        {[
+                            ["nombre", "Nombre completo", "text"],
+                            ["correo", "Correo electrónico", "email"],
+                            ["direccion", "Dirección", "text"],
+                            ["comuna", "Comuna", "text"],
+                            ["telefono", "Teléfono", "text"]
+                        ].map(function(campo) {
 
-                        {/* NOMBRE */}
+                            const [name, etiqueta, tipo] = campo;
 
-                        <div className="mb-3">
+                            return (
+                                <div className="mb-3" key={name}>
 
-                            <label className="form-label">
-                                Nombre completo
-                            </label>
+                                    <label
+                                        htmlFor={name}
+                                        className="form-label"
+                                    >
+                                        {etiqueta}
+                                    </label>
 
-                            <input
-                                type="text"
-                                name="nombre"
-                                className={
-                                    "form-control " +
-                                    (
-                                        errores.nombre
-                                            ? "is-invalid"
-                                            : ""
-                                    )
-                                }
-                                value={
-                                    datos.nombre
-                                }
-                                onChange={
-                                    manejarNombre
-                                }
-                            />
+                                    <input
+                                        id={name}
+                                        name={name}
+                                        type={tipo}
+                                        className={
+                                            "form-control " +
+                                            (errores[name] ? "is-invalid" : "")
+                                        }
+                                        value={datos[name]}
+                                        onChange={manejarCambio}
+                                        maxLength={
+                                            name === "telefono"
+                                                ? 9
+                                                : undefined
+                                        }
+                                        inputMode={
+                                            name === "telefono"
+                                                ? "numeric"
+                                                : undefined
+                                        }
+                                    />
 
-                            {errores.nombre && (
+                                    {errores[name] && (
+                                        <div className="invalid-feedback">
+                                            {errores[name]}
+                                        </div>
+                                    )}
 
-                                <div className="invalid-feedback">
-                                    {errores.nombre}
                                 </div>
+                            );
+                        })}
 
-                            )}
+                        <div className="mb-4">
 
-                        </div>
-
-
-                        {/* CORREO */}
-
-                        <div className="mb-3">
-
-                            <label className="form-label">
-                                Correo electrónico
-                            </label>
-
-                            <input
-                                type="email"
-                                name="correo"
-                                className={
-                                    "form-control " +
-                                    (
-                                        errores.correo
-                                            ? "is-invalid"
-                                            : ""
-                                    )
-                                }
-                                value={
-                                    datos.correo
-                                }
-                                onChange={
-                                    manejarCorreo
-                                }
-                                placeholder="usuario@gmail.com"
-                            />
-
-                            {errores.correo && (
-
-                                <div className="invalid-feedback">
-                                    {errores.correo}
-                                </div>
-
-                            )}
-
-                        </div>
-
-
-                        {/* DIRECCIÓN */}
-
-                        <div className="mb-3">
-
-                            <label className="form-label">
-                                Dirección
-                            </label>
-
-                            <input
-                                type="text"
-                                name="direccion"
-                                className={
-                                    "form-control " +
-                                    (
-                                        errores.direccion
-                                            ? "is-invalid"
-                                            : ""
-                                    )
-                                }
-                                value={
-                                    datos.direccion
-                                }
-                                onChange={
-                                    manejarCambio
-                                }
-                            />
-
-                            {errores.direccion && (
-
-                                <div className="invalid-feedback">
-                                    {errores.direccion}
-                                </div>
-
-                            )}
-
-                        </div>
-
-
-                        {/* COMUNA */}
-
-                        <div className="mb-3">
-
-                            <label className="form-label">
-                                Comuna
-                            </label>
-
-                            <input
-                                type="text"
-                                name="comuna"
-                                className={
-                                    "form-control " +
-                                    (
-                                        errores.comuna
-                                            ? "is-invalid"
-                                            : ""
-                                    )
-                                }
-                                value={
-                                    datos.comuna
-                                }
-                                onChange={
-                                    manejarComuna
-                                }
-                            />
-
-                            {errores.comuna && (
-
-                                <div className="invalid-feedback">
-                                    {errores.comuna}
-                                </div>
-
-                            )}
-
-                        </div>
-
-
-                        {/* TELÉFONO */}
-
-                        <div className="mb-3">
-
-                            <label className="form-label">
-                                Teléfono
-                            </label>
-
-                            <input
-                                type="text"
-                                name="telefono"
-                                className={
-                                    "form-control " +
-                                    (
-                                        errores.telefono
-                                            ? "is-invalid"
-                                            : ""
-                                    )
-                                }
-                                value={
-                                    datos.telefono
-                                }
-                                maxLength="9"
-                                inputMode="numeric"
-                                placeholder="912345678"
-                                onChange={
-                                    manejarTelefono
-                                }
-                            />
-
-                            {errores.telefono && (
-
-                                <div className="invalid-feedback">
-                                    {errores.telefono}
-                                </div>
-
-                            )}
-
-                        </div>
-
-
-                        {/* ENTREGA */}
-
-                        <div className="mb-3">
-
-                            <label className="form-label">
+                            <label
+                                htmlFor="entrega"
+                                className="form-label"
+                            >
                                 Tipo de entrega
                             </label>
 
                             <select
+                                id="entrega"
                                 name="entrega"
                                 className={
                                     "form-select " +
-                                    (
-                                        errores.entrega
-                                            ? "is-invalid"
-                                            : ""
-                                    )
+                                    (errores.entrega ? "is-invalid" : "")
                                 }
-                                value={
-                                    datos.entrega
-                                }
-                                onChange={
-                                    manejarCambio
-                                }
+                                value={datos.entrega}
+                                onChange={manejarCambio}
                             >
-
                                 <option value="">
                                     Seleccione una opción
                                 </option>
-
                                 <option value="domicilio">
                                     Envío a domicilio
                                 </option>
-
                                 <option value="retiro">
                                     Retiro en tienda
                                 </option>
-
                             </select>
 
                             {errores.entrega && (
-
                                 <div className="invalid-feedback">
                                     {errores.entrega}
                                 </div>
-
                             )}
 
                         </div>
 
+                        <div className="card mb-4">
+                            <div className="card-body">
+
+                                <h2 className="h5">
+                                    Resumen del pago
+                                </h2>
+
+                                <div className="d-flex justify-content-between">
+                                    <span>Neto</span>
+                                    <span>{formatoPrecio(neto)}</span>
+                                </div>
+
+                                <div className="d-flex justify-content-between">
+                                    <span>IVA incluido (19%)</span>
+                                    <span>{formatoPrecio(iva)}</span>
+                                </div>
+
+                                <hr />
+
+                                <div className="d-flex justify-content-between">
+                                    <strong>Total a pagar</strong>
+                                    <strong>{formatoPrecio(total)}</strong>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        {/* OPCIÓN PARA DEMOSTRAR ERROR DE PAGO */}
+                        <div className="alert alert-warning">
+
+                            <div className="form-check">
+
+                                <input
+                                    type="checkbox"
+                                    id="simularRechazo"
+                                    className="form-check-input"
+                                    checked={simularRechazo}
+                                    onChange={function(evento) {
+                                        setSimularRechazo(
+                                            evento.target.checked
+                                        );
+                                    }}
+                                />
+
+                                <label
+                                    htmlFor="simularRechazo"
+                                    className="form-check-label"
+                                >
+                                    Simular pago rechazado
+                                </label>
+
+                            </div>
+
+                            <small>
+                                Opción de demostración académica.
+                                No se realiza ningún cobro real.
+                            </small>
+
+                        </div>
 
                         <button
                             type="submit"
-                            className="btn btn-success w-100"
+                            className="btn btn-success w-100 btn-lg"
                         >
-                            Finalizar compra
+                            Confirmar compra
                         </button>
 
                     </form>
 
                 </div>
-
             </div>
-
         </main>
-
     );
 }
-
 
 export default Checkout;

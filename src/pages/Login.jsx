@@ -1,12 +1,35 @@
+
 import React, { useState } from "react";
-import {
-    Link,
-    useHistory
-} from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 
 import {
     correoEsValido
 } from "../utils/logicaNexaGear.js";
+
+
+const cuentasDemo = [
+    {
+        id: 1,
+        nombre: "Administrador",
+        correo: "admin@nexagear.cl",
+        contrasena: "Admin1234!",
+        rol: "ADMINISTRADOR"
+    },
+    {
+        id: 2,
+        nombre: "Vendedor",
+        correo: "vendedor@nexagear.cl",
+        contrasena: "Vendedor1234!",
+        rol: "VENDEDOR"
+    },
+    {
+        id: 3,
+        nombre: "Cliente",
+        correo: "cliente@nexagear.cl",
+        contrasena: "Cliente1234!",
+        rol: "CLIENTE"
+    }
+];
 
 
 function Login() {
@@ -18,104 +41,83 @@ function Login() {
     const [error, setError] = useState("");
 
 
-    function manejarEnvio(evento) {
+    function iniciarSesion(evento) {
 
         evento.preventDefault();
-
         setError("");
 
+        const correoNormalizado = correo.trim().toLowerCase();
 
-        if (
-            correo.trim() === "" ||
-            contrasena.trim() === ""
-        ) {
-
-            setError(
-                "Debe completar todos los campos."
-            );
-
+        if (!correoEsValido(correoNormalizado)) {
+            setError("Ingrese un correo electrónico válido.");
             return;
         }
 
-
-        if (!correoEsValido(correo)) {
-
-            setError(
-                "Ingrese un correo electrónico válido."
-            );
-
+        if (contrasena.trim() === "") {
+            setError("Ingrese su contraseña.");
             return;
         }
 
+        // CUENTAS DE DEMOSTRACIÓN
+        const cuentaDemo = cuentasDemo.find(function(cuenta) {
+            return cuenta.correo === correoNormalizado;
+        });
 
+        if (cuentaDemo) {
+
+            if (cuentaDemo.contrasena !== contrasena) {
+                setError("Contraseña incorrecta.");
+                return;
+            }
+
+            guardarSesion(cuentaDemo);
+            return;
+        }
+
+        // CLIENTES REGISTRADOS EN LA TIENDA
+        const guardados = localStorage.getItem("usuariosAdmin");
+
+        const usuarios = guardados
+            ? JSON.parse(guardados)
+            : [];
+
+        const usuario = usuarios.find(function(item) {
+            return item.correo &&
+                item.correo.toLowerCase() === correoNormalizado;
+        });
+
+        if (!usuario) {
+            setError("No existe una cuenta con ese correo.");
+            return;
+        }
+
+        // El registro anterior no almacena una contraseña
+        // verificable. Este acceso continúa siendo simulado.
         if (contrasena.length < 8) {
-
-            setError(
-                "La contraseña debe tener al menos 8 caracteres."
-            );
-
+            setError("La contraseña debe tener al menos 8 caracteres.");
             return;
         }
 
-
-        const usuariosGuardados =
-            localStorage.getItem("usuariosAdmin");
-
-
-        const usuarios =
-            usuariosGuardados
-                ? JSON.parse(usuariosGuardados)
-                : [];
+        guardarSesion({
+            ...usuario,
+            rol: "CLIENTE"
+        });
+    }
 
 
-        const correoNormalizado =
-            correo.trim().toLowerCase();
+    function guardarSesion(usuario) {
 
-
-        const usuarioEncontrado =
-            usuarios.find(function(usuario) {
-
-                return (
-                    usuario.correo &&
-                    usuario.correo
-                        .trim()
-                        .toLowerCase() ===
-                    correoNormalizado
-                );
-            });
-
-
-        if (!usuarioEncontrado) {
-
-            setError(
-                "No existe una cuenta registrada con este correo."
-            );
-
-            return;
-        }
-
-
-        const sesionUsuario = {
-
-            id:
-                usuarioEncontrado.id,
-
-            nombre:
-                usuarioEncontrado.nombre,
-
-            apellido:
-                usuarioEncontrado.apellido,
-
-            correo:
-                usuarioEncontrado.correo
+        const sesion = {
+            id: usuario.id,
+            nombre: usuario.nombre,
+            correo: usuario.correo,
+            rol: usuario.rol
         };
-
 
         localStorage.setItem(
             "sesionUsuario",
-            JSON.stringify(sesionUsuario)
+            JSON.stringify(sesion)
         );
-
 
         history.replace("/");
     }
@@ -126,90 +128,60 @@ function Login() {
 
             <div className="row justify-content-center">
 
-                <div className="col-12 col-md-6 col-lg-4">
+                <div className="col-12 col-md-6 col-lg-5">
 
-                    <div className="card shadow">
+                    <div className="card shadow-sm">
 
                         <div className="card-body p-4">
 
-                            <h1 className="text-center mb-3">
+                            <h1 className="text-center mb-4">
                                 Iniciar sesión
                             </h1>
 
-                            <p className="text-center text-muted mb-4">
-                                Ingresa a tu cuenta NexaGear.
-                            </p>
-
-
-                            <form
-                                onSubmit={manejarEnvio}
-                                noValidate
-                            >
+                            <form onSubmit={iniciarSesion} noValidate>
 
                                 <div className="mb-3">
 
-                                    <label
-                                        htmlFor="correo-login"
-                                        className="form-label"
-                                    >
+                                    <label className="form-label">
                                         Correo electrónico
                                     </label>
 
                                     <input
                                         type="email"
-                                        id="correo-login"
                                         className="form-control"
                                         value={correo}
                                         onChange={function(evento) {
-
-                                            setCorreo(
-                                                evento.target.value
-                                            );
-
+                                            setCorreo(evento.target.value);
                                             setError("");
                                         }}
-                                        placeholder="usuario@gmail.com"
+                                        placeholder="correo@ejemplo.cl"
                                     />
 
                                 </div>
 
-
                                 <div className="mb-3">
 
-                                    <label
-                                        htmlFor="contrasena-login"
-                                        className="form-label"
-                                    >
+                                    <label className="form-label">
                                         Contraseña
                                     </label>
 
                                     <input
                                         type="password"
-                                        id="contrasena-login"
                                         className="form-control"
                                         value={contrasena}
                                         onChange={function(evento) {
-
-                                            setContrasena(
-                                                evento.target.value
-                                            );
-
+                                            setContrasena(evento.target.value);
                                             setError("");
                                         }}
-                                        placeholder="Mínimo 8 caracteres"
                                     />
 
                                 </div>
 
-
                                 {error && (
-
                                     <div className="alert alert-danger">
                                         {error}
                                     </div>
-
                                 )}
-
 
                                 <button
                                     type="submit"
@@ -218,18 +190,14 @@ function Login() {
                                     Ingresar
                                 </button>
 
-
-                                <div className="text-center mt-3">
-
-                                    ¿No tienes una cuenta?{" "}
-
-                                    <Link to="/registro">
-                                        Regístrate
-                                    </Link>
-
-                                </div>
-
                             </form>
+
+                            <p className="text-center mt-3 mb-0">
+                                ¿No tienes cuenta?{" "}
+                                <Link to="/registro">
+                                    Regístrate
+                                </Link>
+                            </p>
 
                         </div>
 
